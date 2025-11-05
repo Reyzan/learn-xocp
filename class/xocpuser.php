@@ -1,0 +1,516 @@
+<?php
+//--------------------------------------------------------------------//
+// Filename : class/xocpuser.php                                      //
+// Software : XOCP - X Open Community Portal                          //
+// Version  : 0.1                                                     //
+// Date     : 2002-11-16                                              //
+// Author   : (anybody)                                               //
+// License  : Public Domain                                           //
+//                                                                    //
+// You may use and modify this software as you wish. Share and Enjoy! //
+//--------------------------------------------------------------------//
+
+if ( !defined('XOCP_USER_DEFINED') ) {
+   define('XOCP_USER_DEFINED', TRUE);
+
+class XocpGroup extends XocpObject{
+
+   function XocpGroup($id = NULL){
+      $this->XocpObject();
+      $this->initVar("group_id", "int", NULL, false);
+      $this->initVar("group_cd", "textbox", NULL, true, 50);
+      $this->initVar("portal_id", "int", NULL, true);
+      if ( !empty($id) ) {
+         if ( is_array($id) ) {
+            $this->set($id);
+         } else {
+            $this->load(intval($id));
+         }
+      }
+   }
+
+   function load($group_id) {
+      $sql = "SELECT * FROM ".XOCP_PREFIX."groups WHERE group_id='".$group_id."'";
+      $arr = $this->db->fetchArray($this->db->query($sql));
+      $this->set($arr);
+   }
+
+   function store(){
+      if ( !$this->isCleaned() ) {
+         if ( !$this->cleanVars() ) {
+            return false;
+         }
+      }
+      foreach ( $this->cleanVars as $k=>$v ) {
+         $$k = $v;
+      }
+      if ( empty($group_id) ) {
+         $group_id = $this->db->genId(PREFIX."groups_groupid_seq");
+         $sql = "INSERT INTO ".XOCP_PREFIX."groups (group_id, group_cd, portal_id) VALUES ('$group_id', '$group_cd', '$portal_id')";
+      }  else {
+         $sql = "UPDATE ".XOCP_PREFIX."groups SET portal_id='$portal_id' WHERE group_id='$group_id'";
+      }
+      if ( !$result = $this->db->query($sql) ) {
+         $this->setErrors("Could not store data in database.");
+         return false;
+      }
+      if ( empty($group_id) ) {
+         $group_id = $this->db->getInsertId();
+      }
+
+      return $group_id;
+   }
+
+   function delete(){
+      if ( !$result = $this->db->query("DELETE FROM ".XOCP_PREFIX."groups WHERE group_id=".$this->getVar("group_id")."") ) {
+         exit();
+      }
+      $result = $this->db->query("DELETE FROM ".XOCP_PREFIX."lnk_users_groups WHERE group_id=".$this->getVar("group_id")."");
+      $result = $this->db->query("DELETE FROM ".XOCP_PREFIX."menuitems WHERE group_id=".$this->getVar("group_id")."");
+      return true;
+   }
+
+   // public static
+   function checkRight($which, $id, $group_id=0){
+      $db =& Database::getInstance();
+      if ( $which == "module" ) {
+         $table = "lnk_groups_modules";
+         $column = "module_id";
+      } elseif ( $which == "block" ) {
+         $table = "lnk_groups_blocks";
+         $column = "block_id";
+      } elseif ( $which == "page" ) {
+         $table = "lnk_groups_pages";
+         $column = "page_id";
+      }
+      $sql = "SELECT COUNT(*) FROM ".XOCP_PREFIX.$table." WHERE";
+      if ( !empty($id) ) {
+         $sql .= " $column='$id'";
+      }
+      if ( is_array($group_id) ) {
+         $sql .= " AND (group_id=".$group_id[0]."";
+         $size = sizeof($group_id);
+         if ( $size > 1 ) {
+            for ( $i = 1; $i < $size; $i++ ) {
+               $sql .= " OR group_id='".$group_id[$i]."'";
+            }
+         }
+         $sql .= ")";
+      } else {
+         $sql .= " AND group_id='$group_id'";
+      }
+      list($count) = $db->fetchRow($db->query($sql));
+      if ( $count > 0 ) {
+         return true;
+      }
+      return false;
+   }
+
+   // public static
+   function getByUser($user, $asobject=false){
+      $db =& Database::getInstance();
+      $ret = array();
+      if ( get_class($user) == "xocpuser" ) {
+         $sql = "SELECT g.* FROM ".XOCP_PREFIX."groups g LEFT JOIN ".XOCP_PREFIX."lnk_users_groups l ON l.group_id=g.group_id WHERE l.user_id='".$user->getVar("user_id")."'";
+         $result = $db->query($sql);
+         if ( $db->getRowsNum($result) ) {
+            while ( $myrow = $db->fetchArray($result) ) {
+               if ( $asobject ) {
+                  $ret[] = new XocpGroup($myrow);
+               } else {
+                  $ret[] = $myrow['group_id'];
+               }
+            }
+         }
+      }
+      return $ret;
+   }
+
+   // public static
+   function getAllGroupsList($criteria=array(), $sort="group_id", $order="ASC"){
+      $db =& Database::getInstance();
+      $ret = array();
+      $where_query = "";
+      if ( is_array($criteria) && count($criteria) > 0 ) {
+         $where_query = " WHERE";
+         foreach ( $criteria as $c ) {
+            $where_query .= " $c AND";
+         }
+         $where_query = substr($where_query, 0, -4);
+      }
+      $sql = "SELECT group_id, group_cd FROM ".XOCP_PREFIX."groups $where_query ORDER BY $sort $order";
+      $result = $db->query($sql);
+      while ( $myrow = $db->fetchArray($result) ) {
+         $ret[$myrow['group_id']] = $myrow['group_cd'];
+      }
+      return $ret;
+   }
+
+   // public
+   function getMembers($asobject=false){
+      $ret = array();
+      if ( !$asobject ) {
+         $sql = "SELECT user_id FROM ".XOCP_PREFIX."lnk_users_groups WHERE group_id='".$this->getVar("group_id")."'";
+         $result = $this->db->query($sql);
+         while ( $myrow = $this->db->fetchArray($result) ) {
+            $ret[] = $myrow['user_id'];
+         }
+      } else {
+         $sql = "SELECT u.* FROM ".XOCP_PREFIX."lnk_users_groups l, ".XOCP_PREFIX."users u WHERE l.group_id='".$this->getVar("group_id")."' AND u.user_id=l.user_id";
+         $result = $this->db->query($sql);
+         while ( $myrow = $this->db->fetchArray($result) ) {
+            $obj = new XocpUser($myrow);
+            $ret[] = $obj;
+         }
+      }
+      return $ret;
+   }
+
+   // public
+   function addMember($user){
+      if ( get_class($user) == "xocpuser" ) {
+         $this->db->queryF("INSERT INTO ".XOCP_PREFIX."lnk_users_groups (group_id, user_id) VALUES ('".$this->getVar("group_id")."', '".$user->getVar("user_id")."')");
+         return true;
+      }
+      return false;
+   }
+
+}
+
+
+class XocpUserSession{
+
+   var $sessionID;
+   var $cookie;
+   var $expiretime;
+   var $db;
+   var $hash;
+   var $uid;
+
+   function XocpUserSession($sessionid=""){
+      global $xoopsConfig;
+      $this->db =& Database::getInstance();
+      $this->cookie = $xoopsConfig['sessioncookie'];
+      $this->expiretime = $xoopsConfig['sessionexpire'];
+      if($sessionid != ""){
+         $this->sessionID = $sessionid;
+      }
+   }
+
+   /*
+   * creates new session for user 
+   * and sets a cookie containing the session id
+   */
+   function store(){
+      global $REMOTE_ADDR;
+      $this->hash = md5(uniqid(rand()));
+      $this->db->query("DELETE FROM ".XOCP_PREFIX."session WHERE uid=".$this->uid." AND ip='".$REMOTE_ADDR."'");
+           if (!$this->db->query("INSERT INTO ".XOCP_PREFIX."session (uid, time, ip, hash) VALUES ($this->uid, ".time().", '$REMOTE_ADDR', '$this->hash')")) {
+         return false;
+      }
+      setcookie($this->cookie, $this->hash, time()+360000, "/",  "", 0);
+      return true;
+   }
+
+   function setUid($value){
+      $this->uid = $value;
+   }
+
+   function uid(){
+      return $this->uid;
+   }
+
+   function isValid() {
+      unset($uid);
+      $mintime = time() - $this->expiretime;
+           $this->db->queryF("DELETE FROM ".XOCP_PREFIX."session WHERE time < $mintime");
+      $sql = "SELECT uid FROM ".XOCP_PREFIX."session WHERE hash='".$this->sessionID."'";
+          if ( !$result = $this->db->query($sql) ) {
+         return false;
+      }
+          list($uid) = $this->db->fetchRow($result);
+      if ( !empty($uid) ) {
+         $this->uid = $uid;
+             return true;
+          }
+          return false;
+   }
+
+   /*
+   * updates the session table
+   */
+   function update(){
+      global $REMOTE_ADDR;
+      $this->db->queryF("UPDATE ".XOCP_PREFIX."session SET time=".time()." WHERE uid=".$this->uid." AND ip='$REMOTE_ADDR'");
+   }
+}
+
+
+Class XocpUser extends XocpObject{
+
+   var $inactive = false;
+   var $groups = array();
+   var $sessiondir = "";
+
+   function XocpUser($id=NULL){
+      $this->XocpObject();
+      $this->initVar("user_id", "int", NULL, false);
+      $this->initVar("person_id", "int", NULL, false);
+      $this->initVar("user_nm", "textbox", NULL, true, 30, false);
+      $this->initVar("pwd0", "textbox", NULL, false, 32, false);
+      $this->initVar("pwd1", "textbox", NULL, false, 32, false);
+      $this->initVar("language", "textbox", NULL, true, 32, false);
+      $this->initVar("avatar", "textbox", NULL, false, 30);
+      $this->initVar("regdate", "textbox", NULL, false);
+      $this->initVar("icq", "textbox", NULL, false, 15, true);
+      $this->initVar("viewemail", "textbox", "n", false);
+      $this->initVar("aim", "textbox", NULL, false, 18, true);
+      $this->initVar("yim", "textbox", NULL, false, 25, true);
+      $this->initVar("msnm", "textbox", NULL, false, 25, true);
+      $this->initVar("startpage", "textbox", NULL, false, 50, true);
+      $this->initVar("user_theme", "textbox", "y", false);
+      $this->initVar("theme", "textbox", NULL, false, 250);
+      $this->initVar("sig", "textarea", NULL, false, 250, true);
+      $this->initVar("attachsig", "textbox", "n", false);
+      $this->initVar("tz_offset", "int", NULL, false);
+      $this->initVar("popmsgon", "textbox", "y", false);
+      $this->initVar("last_login", "int", 0, false);
+      $this->initVar("status_cd", "textbox", "inactive", false);
+
+      $this->initVar("person_nm", "textbox", NULL, true);
+
+      $this->load(intval($id));
+   }
+
+   function login($uname, $pass, $hash){
+      global $xocp_rand;
+      $myts =& MyTextSanitizer::getInstance();
+      $uname = $myts->makeTboxData4Save($uname);
+      $sql = "SELECT user_id, pwd0, status_cd FROM ".XOCP_PREFIX."users WHERE user_nm='$uname'";
+      $result = $this->db->query($sql);
+      if ( $this->db->getRowsNum($result) == 1 ) {
+         $passed = false;
+         $myrow = $this->db->fetchArray($result);
+         if ( $myrow['status_cd'] != "active" ) {
+            $this->inactive = true;
+            return XOCP_USERINACTIVE;
+         }
+         if ($myrow['user_id'] != 0) {
+            $user_pass = md5($hash.$myrow['pwd0']);
+            if ($pass == $user_pass) {
+               $passed=true;
+            }
+
+            if ( $passed ) {
+               // setup user session here
+               $this->load($myrow['user_id']);
+               $this->db->query("UPDATE ".XOCP_PREFIX."users SET last_login='".time()."' WHERE user_id='".$myrow['user_id']."'");
+               return XOCP_USEROK;
+            } else {
+               return XOCP_WRONGPASSWORD;
+            }
+         } else {
+            return XOCP_USERNOEXISTS;
+         }
+      } else {
+         return XOCP_USERNOEXISTS;
+      }
+   }
+
+   /*
+   * Logs out user
+   * removes user session from session table 
+   */
+   function logout(){
+      $this->db->queryF("DELETE FROM ".XOCP_PREFIX."session WHERE uid=".$this->getVar("user_id")."");
+   }
+
+   function load($id){
+      $sql = "SELECT * FROM ".XOCP_PREFIX."users WHERE user_id='".$id."'";
+      if ( !$result = $this->db->query($sql) ) {
+         die("ERROR");
+      }
+      $numrows = $this->db->getRowsNum($result);
+      if ( $numrows == 1 ) {
+         $myrow = $this->db->fetchArray($result);
+         $this->set($myrow);
+      } elseif ( $numrows == 0 ) {
+         $this->inactive = true;
+      } else {
+         die("Duplicate User Entries!");
+      }
+      $sql = "SELECT person_nm FROM ".XOCP_PREFIX."persons WHERE person_id='".$myrow['person_id']."'";
+      if ( !$result = $this->db->query($sql) ) {
+         die("ERROR");
+      } else {
+         if($this->db->getRowsNum($result)==1) {
+            $row = $this->db->fetchArray($result);
+            $this->set($row);
+         }
+      }
+   }
+
+   function store(){
+      if ( !$this->isCleaned() ) {
+         if ( !$this->cleanVars() ) {
+            return false;
+         }
+      }
+      foreach ( $this->cleanVars as $k=>$v ) {
+         $$k = $v;
+      }
+      if ( empty($user_id) ) {
+         $uid = $this->db->genId(PREFIX."users_uid_seq");
+         $sql = "INSERT INTO ".XOCP_PREFIX."users (user_id,person_id,portal_id,user_nm,pwd0,pwd1,avatar,regdate,icq,viewemail,aim,yim,msnm,user_theme,theme,sig,attachsig,popmsgon,status_cd)"
+              . " VALUES (NULL,'$person_id','$portal_id','$user_nm','$pwd0','$pwd1','$avatar','".time()."','$icq','$viewemail','$aim','$yim','$msnm','$user_theme','$theme','$sig','$attachsig','$popmsgon','$status_cd')";
+      }  else {
+         $sql ="UPDATE ".XOCP_PREFIX."users SET user_nm='$user_nm',pwd0='$pwd0',pwd1='$pwd1',avatar='$avatar',icq='$icq',viewemail='$viewemail',aim='$aim',yim='$yim',msnm='$msnm',user_theme='$user_theme',theme='$theme',sig='$sig',attachsig='$attachsig',popmsgon='$popmsgon',status_cd = '$status_cd' WHERE user_id='$user_id'";
+      }
+
+      if ( !$result = $this->db->query($sql) ) {
+         $this->setErrors("Could not store data in database.");
+         return false;
+      }
+      if ( empty($uid) ) {
+         $uid = $this->db->getInsertId();
+      }
+      return $uid;
+   }
+
+   function delete(){
+      if ( $this->getVar("uid") > 0 ) {
+         $sql = "DELETE FROM ".XOCP_PREFIX."users WHERE user_id='".$this->getVar("user_id")."'";
+         if ( !$result = $this->db->query($sql) ) {
+            return false;
+         }
+         $this->db->query("DELETE FROM ".XOCP_PREFIX."lnk_users_groups WHERE user_id='".$this->getVar("user_id")."'");
+         $this->logout();
+      }
+      return true;
+   }
+
+   function activate(){
+      $sql = "UPDATE ".XOCP_PREFIX."users SET status_cd='active' WHERE user_id='".$this->getVar("user_id")."'";
+      if ( !$result = $this->db->queryF($sql) ) {
+         return false;
+      }
+      return true;
+   }
+      
+   function isActive(){
+      if ( $this->inactive == true) {
+         return false;
+      } else {
+         return true;
+      }
+   }
+
+   /*
+   *  returns an array of group ids this user belongs
+   */
+   function groups(){
+      $this->groups = XocpGroup::getByUser($this);
+      return $this->groups;
+   }
+
+   /*
+    * Function to get user name from a certain user id
+    */
+   function getUnameFromId($userid) {
+      global $xoopsConfig;
+      $db =& Database::getInstance();
+      $sql = "SELECT user_nm FROM ".XOCP_PREFIX."users WHERE user_id = '$user_id'";
+      if ( !$result = $db->query($sql) ) {
+         return false;
+      }
+      if ( !$arr = $db->fetchArray($result) ) {
+         return false;
+      }
+      $myts =& MyTextSanitizer::getInstance();
+      $uname = $myts->makeTboxData4Show($arr['user_nm']);
+      return $uname;
+   }
+
+   // this requires whosonline module to be installed
+   // if not installed, it will always return false
+   function isOnline(){
+      $sql = "SELECT COUNT(*) FROM ".XOCP_PREFIX."lastseen WHERE uid=".$this->getVar("uid")." AND online=1";
+      if ( !$result = $this->db->query($sql) ) {
+         return false;
+      }
+      list($count) = $this->db->fetchRow($result);
+      if ( $count > 0 ) {
+         return true;
+      }
+      return false;
+   }
+
+   function getAllUsers($criteria=array(), $asobject=false, $orderby="uid ASC", $limit=0, $start=0){
+      $db =& Database::getInstance();
+      $ret = array();
+      $where_query = "";
+      if ( is_array($criteria) && count($criteria) > 0 ) {
+         $where_query = "WHERE";
+         foreach ( $criteria as $c ) {
+            $where_query .= " $c AND";
+         }
+         $where_query = substr($where_query, 0, -4);
+      }
+      if ( !$asobject ) {
+         $sql = "SELECT uid FROM ".XOCP_PREFIX."users $where_query ORDER BY $orderby";
+         $result = $db->query($sql,$limit,$start);
+         while ( $myrow = $db->fetchArray($result) ) {
+            $ret[] = $myrow['uid'];
+         }
+      } else {
+         $sql = "SELECT * FROM ".XOCP_PREFIX."users $where_query ORDER BY $orderby";
+         $result = $db->query($sql,$limit,$start);
+         while ( $myrow = $db->fetchArray($result) ) {
+            $ret[] = new XocpUser($myrow);
+         }
+      }
+      //echo $sql;
+      return $ret;
+   }
+
+   function getAllUsersList($criteria=array(), $orderby="uid ASC", $limit=0, $start=0){
+      $db =& Database::getInstance();
+      $myts =& MyTextSanitizer::getInstance();
+      $ret = array();
+      $where_query = "";
+      if ( is_array($criteria) && count($criteria) > 0 ) {
+         $where_query = " WHERE";
+         foreach ( $criteria as $c ) {
+            $where_query .= " $c AND";
+         }
+         $where_query = substr($where_query, 0, -4);
+      }
+      $sql = "SELECT uid, uname FROM ".XOCP_PREFIX."users $where_query ORDER BY $orderby";
+      $result = $db->query($sql,$limit,$start);
+      while ( $myrow = $db->fetchArray($result) ) {
+         $ret[$myrow['uid']] = $myts->makeTboxData4Show($myrow['uname']);
+      }
+      return $ret;
+   }
+
+   function countAllUsers($criteria=array()){
+      $db =& Database::getInstance();
+      $where_query = "";
+      if ( is_array($criteria) && count($criteria) > 0 ) {
+         $where_query = "WHERE";
+         foreach ( $criteria as $c ) {
+            $where_query .= " $c AND";
+         }
+         $where_query = substr($where_query, 0, -4);
+      }
+      $sql = "SELECT COUNT(*) FROM ".XOCP_PREFIX."users $where_query";
+      $result = $db->query($sql);
+      list($ret) = $db->fetchRow($result);
+      return $ret;
+   }
+
+
+}
+
+} // XOCP_USER_GROUP_DEFINED
+?>

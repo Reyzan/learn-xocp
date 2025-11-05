@@ -1,0 +1,281 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 xocp:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2002.11.21.23.20.13;	author adiet9000;	state dead;
+branches;
+next	1.1;
+
+1.1
+date	2002.11.19.19.57.13;	author adiet9000;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.11.19.19.57.13;	author adiet9000;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@--
+@
+text
+@<?php
+// ------------------------------------------------------------------------- //
+//                XOOPS - PHP Content Management System                      //
+//                       <http://www.xoops.org/>                             //
+// ------------------------------------------------------------------------- //
+//  This program is free software; you can redistribute it and/or modify     //
+//  it under the terms of the GNU General Public License as published by     //
+//  the Free Software Foundation; either version 2 of the License, or        //
+//  (at your option) any later version.                                      //
+//                                                                           //
+//  This program is distributed in the hope that it will be useful,          //
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of           //
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            //
+//  GNU General Public License for more details.                             //
+//                                                                           //
+//  You should have received a copy of the GNU General Public License        //
+//  along with this program; if not, write to the Free Software              //
+//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA //
+// ------------------------------------------------------------------------- //
+// Author of File: 							     //
+// Kazumi Ono (http://www.mywebaddons.com/ , http://www.myweb.ne.jp/)        //
+// ------------------------------------------------------------------------- //
+?>
+<!--xoopsCode start-->
+<script type="text/javascript">
+<!--
+function xoopsCodeUrl(id){
+	var text = prompt("<?php echo _ENTERURL;?>", "");
+	var dom = xoopsGetElementById(id);
+	if ( text != null && text != "" ) {
+		var text2 = prompt("<?php echo _ENTERWEBTITLE;?>", "");
+		if ( text2 != null ) {
+			if ( text2 == "" ) {
+				var result = "[url=" + text + "]" + text + "[/url]";
+			} else {
+				var result = "[url=" + text + "]" + text2 + "[/url]";
+			}
+			dom.value += result;
+		}
+	}
+	dom.focus();
+}
+
+function xoopsCodeImg(id){
+	var text = prompt("<?php echo _ENTERIMGURL;?>", "");
+	var dom = xoopsGetElementById(id);
+	if ( text != null && text != "" ) {
+		var text2 = prompt("<?php echo _ENTERIMGPOS;?>\n<?php echo _IMGPOSRORL;?>", "");
+		while ( ( text2 != "" ) && ( text2 != "r" ) && ( text2 != "R" ) && ( text2 != "l" ) && ( text2 != "L" ) && ( text2 != null ) ) {
+			text2 = prompt("<?php echo _ERRORIMGPOS;?>\n<?php echo _IMGPOSRORL;?>","");           
+		}
+		if ( text2 == "l" || text2 == "L" ) { 
+			text2 = " align=left";
+		} else if ( text2 == "r" || text2 == "R" ) {
+			text2 = " align=right";
+		} else {
+			text2 = "";
+		}
+		var result = "[img" + text2 + "]" + text + "[/img]";
+		var dom = xoopsGetElementById(id);
+		dom.value += result;
+	}
+	dom.focus();
+}
+
+function xoopsCodeEmail(id){
+	var text = prompt("<?php echo _ENTEREMAIL;?>", "");
+	var dom = xoopsGetElementById(id);
+	if ( text != null && text != "" ) {
+		var result = "[email]" + text + "[/email]";
+		dom.value += result;
+	}
+	dom.focus();
+}
+
+function xoopsCodeQuote(id){
+	var text = prompt("<?php echo _ENTERQUOTE;?>", "");
+	var dom = xoopsGetElementById(id);
+	if ( text != null && text != "" ) {
+		var result = "[quote]" + text + "[/quote]";
+		dom.value += result;
+	}
+	dom.focus();
+}
+
+function xoopsCodeText(id){
+	var textareaDom = xoopsGetElementById(id);
+	var textDom = xoopsGetElementById(id + "Addtext");
+	var fontDom = xoopsGetElementById(id + "Font");
+	var colorDom = xoopsGetElementById(id + "Color");
+	var sizeDom = xoopsGetElementById(id + "Size");
+	var hiddenTextDomStyle = xoopsGetElementById("hiddenText").style;
+	var textDomValue = textDom.value;
+	var fontDomValue = fontDom.options[fontDom.options.selectedIndex].value;
+	var colorDomValue = colorDom.options[colorDom.options.selectedIndex].value;
+	var sizeDomValue = sizeDom.options[sizeDom.options.selectedIndex].value;
+	if ( textDomValue == "" ) {
+		alert("<?php echo _ENTERTEXTBOX;?>");
+		textDom.focus();
+	} else {
+		if ( fontDomValue != "FONT") {
+			textDomValue = "[font=" + fontDomValue + "]" + textDomValue + "[/font]";
+			fontDom.options[0].selected = true;
+		}
+		if ( colorDomValue != "COLOR") {
+			textDomValue = "[color=" + colorDomValue + "]" + textDomValue + "[/color]";
+			colorDom.options[0].selected = true;
+		}
+		if ( sizeDomValue != "SIZE") {
+			textDomValue = "[size=" + sizeDomValue + "]" + textDomValue + "[/size]";
+			sizeDom.options[0].selected = true;
+		}
+		if ( xoopsGetElementById(id + "Bold").checked == true ) {
+			textDomValue = "[b]" + textDomValue + "[/b]";
+			xoopsGetElementById(id + "Bold").checked = false;
+		}
+		if ( xoopsGetElementById(id + "Italic").checked == true ) {
+			textDomValue = "[i]" + textDomValue + "[/i]";
+			xoopsGetElementById(id + "Italic").checked = false;
+		}
+		if ( xoopsGetElementById(id + "Underline").checked == true ) {
+			textDomValue = "[u]" + textDomValue + "[/u]";
+			xoopsGetElementById(id + "Underline").checked = false;
+		}
+		textareaDom.value += textDomValue;
+		textDom.value = "";
+		hiddenTextDomStyle.color = "#000000";
+		hiddenTextDomStyle.fontFamily = "";
+		hiddenTextDomStyle.fontStyle = "normal";
+		hiddenTextDomStyle.fontSize = "12px";
+		hiddenTextDomStyle.fontWeight = "normal";
+		hiddenTextDomStyle.textDecoration = "none";
+		hiddenTextDomStyle.visibility = "hidden";
+		textareaDom.focus();
+	}
+}
+
+function xoopsCodeSmilie(id, smilieCode) {
+	var revisedMessage;
+	var textareaDom = xoopsGetElementById(id);
+	revisedMessage = textareaDom.value + smilieCode;
+	textareaDom.value = revisedMessage;
+	textareaDom.focus();
+	return;
+}
+
+function validate(subjectId, textareaId) {
+	var maxchars = 65535;
+	var subjectDom = xoopsGetElementById(subjectId);
+	var textareaDom = xoopsGetElementById(textareaId);
+	if (textareaDom.value == "" || subjectDom.value == "") {
+		alert("<?php echo _PLZCOMPLETE;?>");
+		return false;
+	}
+	if (maxchars != 0) {
+		if (textareaDom.value.length > maxchars) {
+			alert("<?php echo _MESSAGETOOLONG;?>\n\n<?php echo _ALLOWEDCHAR;?>" + maxchars + "\n<?php echo _CURRCHAR;?>" + textareaDom.value.length + "");
+			textareaDom.focus();
+			return false;
+		} else {
+			return true; 
+		}
+	} else {
+		return true;
+	}
+}
+
+
+//--></script>
+<!--xoopsCode end-->
+
+<?php
+/*
+*  displayes xoopsCode buttons and target textarea to which xoopscodes are inserted
+*  $textarea_id is a unique id of the target textarea
+*/
+function xoopsCodeTarea($textarea_id, $cols=50, $rows=10){
+	echo "<input type='button' value='URL' onclick='xoopsCodeUrl(\"$textarea_id\");' /><input type='button' value='IMG' onclick='xoopsCodeImg(\"$textarea_id\");' /><input type='button' value='EMAIL' onclick='xoopsCodeEmail(\"$textarea_id\");' /><input type='button' value='QUOTE' onclick='xoopsCodeQuote(\"$textarea_id\");' /><br />\n";
+
+	$sizearray = array("xx-small", "x-small", "small", "medium", "large", "x-large", "xx-large");
+	echo "<select id='".$textarea_id."Size' onchange='setVisible(\"hiddenText\");setElementSize(\"hiddenText\",this.options[this.selectedIndex].value);'>\n";
+	echo "<option value='SIZE'>"._SIZE."</option>\n";
+	foreach ( $sizearray as $size ) {
+		echo "<option value='$size'>$size</option>\n";
+	}
+	echo "</select>\n";
+
+	$fontarray = array("Arial", "Courier", "Georgia", "Helvetica", "Impact", "Verdana");
+	echo "<select id='".$textarea_id."Font' onchange='setVisible(\"hiddenText\");setElementFont(\"hiddenText\",this.options[this.selectedIndex].value);'>\n";
+	echo "<option value='FONT'>"._FONT."</option>\n";
+	foreach ( $fontarray as $font ) {
+		echo "<option value='$font'>$font</option>\n";
+	}
+	echo "</select>\n";
+
+	$colorarray = array("00", "33", "66", "99", "CC", "FF");
+	echo "<select id='".$textarea_id."Color' onchange='setVisible(\"hiddenText\");setElementColor(\"hiddenText\",this.options[this.selectedIndex].value);'>\n";
+	echo "<option value='COLOR'>"._COLOR."</option>\n";
+	foreach ( $colorarray as $color1 ) {
+		foreach ( $colorarray as $color2 ) {
+			foreach ( $colorarray as $color3 ) {
+				echo "<option value='".$color1.$color2.$color3."' style='background-color:#".$color1.$color2.$color3.";color:#".$color1.$color2.$color3.";'>#".$color1.$color2.$color3."</option>\n";
+			}
+		}
+	}
+	echo "</select><span id='hiddenText'>"._EXAMPLE."</span>\n";
+
+	echo "<br />\n";
+	echo "<input type='checkbox' id='".$textarea_id."Bold' onclick='setVisible(\"hiddenText\");makeBold(\"hiddenText\");' /><b>B</b>&nbsp;<input type='checkbox' id='".$textarea_id."Italic' onclick='setVisible(\"hiddenText\");makeItalic(\"hiddenText\");' /><i>I</i>&nbsp;<input type='checkbox' id='".$textarea_id."Underline' onclick='setVisible(\"hiddenText\");makeUnderline(\"hiddenText\");' /><u>U</u>&nbsp;&nbsp;<input type='textbox' id='".$textarea_id."Addtext' size='20' />&nbsp;<input type='button' onclick='xoopsCodeText(\"$textarea_id\")' value='"._ADD."'><br /><br /><textarea id='".$textarea_id."' name='".$textarea_id."' wrap='virtual' cols='$cols' rows='$rows'>".$GLOBALS[$textarea_id]."</textarea><br />\n";
+}
+
+/*
+*  Displays smilie image buttons used to insert smilie codes to a target textarea in a form
+* $textarea_id is a unique of the target textarea
+*/
+function xoopsSmilies($textarea_id) {
+	global $xoopsConfig;
+
+	$smileyPath = "images/smilies";
+	echo "<a href='javascript: justReturn()' onclick='xoopsCodeSmilie(\"$textarea_id\", \" :-) \");'><img width='15' height='15' src='".XOOPS_URL."/".$smileyPath."/icon_smile.gif' border='0' alt=':-)' /></a>";
+	echo "<a href='javascript: justReturn()' onclick='xoopsCodeSmilie(\"$textarea_id\", \" :-( \");'><img width='15' height='15' src='".XOOPS_URL."/".$smileyPath."/icon_frown.gif' border='0' alt=':-(' /></a>";
+	echo "<a href='javascript: justReturn()' onclick='xoopsCodeSmilie(\"$textarea_id\", \" :-D \");'><img width='15' height='15' src='".XOOPS_URL."/".$smileyPath."/icon_biggrin.gif' border='0' alt=':-D' /></a>";
+	echo "<a href='javascript: justReturn()' onclick='xoopsCodeSmilie(\"$textarea_id\", \" ;-) \");'><img width='15' height='15' src='".XOOPS_URL."/".$smileyPath."/icon_wink.gif' border='0' alt=';-)' /></a>";
+	echo "<a href='javascript: justReturn()' onclick='xoopsCodeSmilie(\"$textarea_id\", \" :-o \");'><img width='15' height='15' src='".XOOPS_URL."/".$smileyPath."/icon_eek.gif' border='0' alt=':-o' /></a>";
+	echo "<a href='javascript: justReturn()' onclick='xoopsCodeSmilie(\"$textarea_id\", \" 8-) \");'><img width='15' height='15' src='".XOOPS_URL."/".$smileyPath."/icon_cool.gif' border='0' alt='8-)' /></a>";
+	echo "<a href='javascript: justReturn()' onclick='xoopsCodeSmilie(\"$textarea_id\", \" :-? \");'><img width='15' height='22' src='".XOOPS_URL."/".$smileyPath."/icon_confused.gif' border='0' alt=':-?' /></a>";
+	echo "<a href='javascript: justReturn()' onclick='xoopsCodeSmilie(\"$textarea_id\", \" :-P \");'><img width='15' height='15' src='".XOOPS_URL."/".$smileyPath."/icon_razz.gif' border='0' alt=':-P' /></a>";
+	echo "<a href='javascript: justReturn()' onclick='xoopsCodeSmilie(\"$textarea_id\", \" :-x \");'><img width='15' height='15' src='".XOOPS_URL."/".$smileyPath."/icon_mad.gif' border='0' alt=':-x' /></a>";
+	echo "&nbsp;[<a href='javascript:openWithSelfMain(\"".XOOPS_URL."/misc.php?action=showpopups&amp;type=smilies&amp;target=".$textarea_id."\",\"smilies\",300,430);'>"._MORE."</a>]";		
+}
+?>@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@@
+
+
+1.1.1.1
+log
+@START CVS
+@
+text
+@@

@@ -1,0 +1,244 @@
+head	1.4;
+access;
+symbols
+	start:1.1.1.1 xocp:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.4
+date	2002.11.21.23.20.13;	author adiet9000;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2002.11.21.17.39.01;	author adiet9000;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.11.20.14.39.33;	author adiet9000;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.11.19.19.57.42;	author adiet9000;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.11.19.19.57.42;	author adiet9000;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.4
+log
+@--
+@
+text
+@BODY {
+   font:11px Verdana;
+   color:#eeeeff;
+   background-color:#8888aa;
+   scrollbar-face-color: #9999bb; scrollbar-highlight-color: #aaaacc;
+   scrollbar-shadow-color: #8888aa; scrollbar-3dlight-color: #9999bb;
+   scrollbar-arrow-color:  #000000; scrollbar-track-color: #b9b9c9;
+   scrollbar-darkshadow-color: #8888aa;
+   margin: 2px;
+}
+
+A {
+   font:11px Verdana,Arial,Helvetica,sans-serif;
+   text-decoration:none;
+   color:#ffffff;
+   font-weight:bold;
+   background-color:transparent;
+}
+
+A:hover {
+   font:11px Verdana,Arial,Helvetica,sans-serif;
+   text-decoration:underline;
+   color:#ffffff;
+   font-style:normal;
+   font-weight:bold;
+   background-color:transarent;
+}
+
+TD {
+   font-family: Verdana;
+   font-size:11px;
+}
+
+
+SELECT {
+   font-family:Tahoma,taipei,Verdana,Arial,Helvetica,sans-serif;
+   font-size:11px;
+   font-weight:bold;
+   color:#000000;
+   background-color:#ffffdd;
+} 
+
+INPUT {
+   color:#000000;
+   font-family:Tahoma,taipei,Verdana,Arial,Helvetica,sans-serif;
+   font-weight:bold;
+   background-color:#ffffcc;
+   font-size:11px;
+   border-color:#000000;
+   border-top-width:1px;
+   border-right-width:1px;
+   border-bottom-width:1px;
+   border-left-width:1px;
+}
+
+TEXTAREA {
+   color:#000000;
+   font-family:Tahoma,taipei,Verdana,Arial,Helvetica,sans-serif;
+   font-weight:bold;
+   font-size:11px;
+   background-color:#ffffcc;
+}
+
+IMG {
+   border:0;
+}
+
+.frm {
+   border-top-width:0px;
+   border-right-width:0px;
+   border-left-width:0px;
+   border-bottom-width:0px;
+}
+
+.block {
+   border-color:#ffffff;
+   border-top-width:0px;
+   border-right-width:0px;
+   border-left-width:1px;
+   border-bottom-width:0px;
+   border-style: solid;
+}
+
+.ft {
+   font-family: Verdana,Arial;
+   background-color: #ccccff;
+   color:#000000;
+   font-size:11px;
+   font-weight: bold;
+   font-style: italic;
+   border-top-width:0px;
+   border-right-width:0px;
+   border-left-width:0px;
+   border-bottom-width:0px;
+   border-color:#888888;
+}
+
+.bt {
+   background-color: #dddddd;
+}
+
+.ca {
+   border-top-width:0px;
+   border-right-width:1px;
+   border-left-width:0px;
+   border-bottom-width:1px;
+   border-color:#aaaaff;
+   background-color: #ffffff;
+   color:#000000;
+}
+
+.in {
+   border-top-width:0px;
+   border-right-width:0px;
+   border-left-width:0px;
+   border-bottom-width:1px;
+   border-color:#aaaaff;
+   background-color: #ffffff;
+   color:#000000;
+}
+
+.cm {
+   border-top-width:0px;
+   border-right-width:0px;
+   border-left-width:0px;
+   border-bottom-width:1px;
+   border-color:#aaaadd;
+   color:#8888ee;
+   background-color: #ffffff;
+}
+
+
+
+.tbl1 {
+    background-color: #5555aa;
+}
+
+.t1b2 {
+    background-color: #ffffff;
+}
+
+.fg1 {
+    color: #000000;
+}
+
+.fg2 {
+    color: #8888cc;
+}
+
+@
+
+
+1.3
+log
+@sedikit lebih gelap
+@
+text
+@d9 1
+@
+
+
+1.2
+log
+@new message handling method with XocpBlock
+@
+text
+@d4 5
+a8 5
+   background-color:#9999bb;
+   scrollbar-face-color: #aaaacc; scrollbar-highlight-color: #bbbbdd;
+   scrollbar-shadow-color: #9999bb; scrollbar-3dlight-color: #aaaacc;
+   scrollbar-arrow-color:  #905000; scrollbar-track-color: #cacada;
+   scrollbar-darkshadow-color: #9999bb;
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d14 2
+a15 1
+   color:#0000ff;
+d22 1
+a22 1
+   color:#0000ff;
+d24 1
+d87 1
+a87 1
+   font-size:12px;
+@
+
+
+1.1.1.1
+log
+@START CVS
+@
+text
+@@

@@ -1,0 +1,149 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 xocp:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2002.11.21.23.20.13;	author adiet9000;	state dead;
+branches;
+next	1.1;
+
+1.1
+date	2002.11.19.19.57.08;	author adiet9000;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.11.19.19.57.08;	author adiet9000;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@--
+@
+text
+@<?php
+// ------------------------------------------------------------------------- //
+//                XOOPS - PHP Content Management System                      //
+//                       <http://www.xoops.org/>                             //
+// ------------------------------------------------------------------------- //
+//  This program is free software; you can redistribute it and/or modify     //
+//  it under the terms of the GNU General Public License as published by     //
+//  the Free Software Foundation; either version 2 of the License, or        //
+//  (at your option) any later version.                                      //
+//                                                                           //
+//  This program is distributed in the hope that it will be useful,          //
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of           //
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            //
+//  GNU General Public License for more details.                             //
+//                                                                           //
+//  You should have received a copy of the GNU General Public License        //
+//  along with this program; if not, write to the Free Software              //
+//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA //
+// ------------------------------------------------------------------------- //
+
+include_once(XOOPS_ROOT_PATH."/class/xoopslists.php");
+include(XOOPS_ROOT_PATH."/include/xoopscodes.php");
+if ( !isset($submit_page) ) {
+	$submit_page = $GLOBALS['PHP_SELF'];
+}
+
+echo "<table><tr><td><form action='postcomment.php' method='post' id='commentform' onsubmit='return validate(\"subject\", \"message\");'><br /><br /><b>". _YOURNAME .":</b>&nbsp;";
+
+if ( $xoopsUser ) {
+	echo "<a href='".XOOPS_URL."/userinfo.php?uid=".$xoopsUser->getVar("uid")."'>".$xoopsUser->getVar("uname")."</a>&nbsp;[&nbsp;<a href='".XOOPS_URL."/user.php?op=logout'>"._LOGOUT."</a>&nbsp;]";
+} else {
+	echo "<b>".$xoopsConfig['anonymous']."</b>";
+	echo " [ <a href='".XOOPS_URL."/register.php'>"._REGISTER."</a> ] ";
+}
+
+echo "<br /><br /><b>". _SUBJECT ."</b><br />";
+
+if ( !eregi("^re:",$subject) ) {
+	$subject = "Re: ".substr($subject,0,56);
+}
+echo "<input type='text' id='subject' name='subject' size='50' maxlength='60' value='$subject' /><br /><br /><b>". _MESSAGEICON ."</b><table><tr align='left'><td>";
+$lists = new XoopsLists;
+$filelist = $lists->getSubjectsList();
+$count = 1;
+while ( list ($key, $file) = each ($filelist) ){
+	$checked = "";
+	if ( isset($icon) && $file == $icon ) {
+		$checked = " checked='checked'";
+	}
+	echo "<input type='radio' value='$file' name='icon'$checked />&nbsp;";
+	echo "<img src='".XOOPS_URL."/images/subject/".$file."' border='0' alt='' />&nbsp;";
+	if ( $count == 8 ){ 
+		echo "<br />"; 
+		$count = 0; 
+	}
+	$count++;
+}
+echo "</td></tr></table><br /><b>". _COMMENT ."</b><br /><br />\n";
+xoopsCodeTarea("message");
+xoopsSmilies("message");
+echo "<br /><br />\n";
+if ( !empty($xoopsConfig['allow_html']) ) {
+	echo "<br />". _ALLOWEDHTML ."<br />\n";
+	echo get_allowed_html();
+	echo "<br />";
+}
+if ( $xoopsUser && $xoopsConfig['anonpost'] ) { 
+	echo "<br /><input type='checkbox' name='noname'";
+	if ( !empty($noname) ) {
+		echo " checked='checked'";
+	}
+	echo " />"._POSTANON.""; 
+}
+
+echo "<br /><input type='checkbox' name='nosmiley' value='1'";
+if ( !empty($nosmiley) ) {
+	echo " checked='checked'";
+}
+echo " />". _DISABLESMILEY ."<br />";
+if ( !empty($xoopsConfig['allow_html']) ) {
+	echo "<input type='checkbox' name='nohtml' value='1'";
+	if ( $nohtml ) {
+		echo " checked='checked'";
+	}
+	echo " />". _DISABLEHTML ."<br />";
+}
+echo "<input type='hidden' name='pid' value='".intval($pid)."' />
+<input type='hidden' name='comment_id' value='".intval($comment_id)."' />
+<input type='hidden' name='item_id' value='".intval($item_id)."' />
+<input type='hidden' name='order' value='".intval($order)."' />
+<select name='op'><option value='preview' selected='selected'>". _PREVIEW ."</option>
+<option value='post'>". _POSTCOMMENT ."</option>
+</select>
+<input type='submit' value='". _GO ."' />
+</form>
+</td></tr></table>";
+unset($submit_page);
+
+?>@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@@
+
+
+1.1.1.1
+log
+@START CVS
+@
+text
+@@

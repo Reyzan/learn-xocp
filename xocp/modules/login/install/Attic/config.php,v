@@ -1,0 +1,80 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 xocp:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2002.11.21.23.05.03;	author adiet9000;	state dead;
+branches;
+next	1.1;
+
+1.1
+date	2002.11.19.19.57.41;	author adiet9000;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.11.19.19.57.41;	author adiet9000;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@--
+@
+text
+@<?php
+$mod_conf['module_nm'] = "Login";
+$mod_conf['version'] = 1.01;
+$mod_conf['description'] = _LOGIN_MODULE_DESC;
+$mod_conf['credits'] = "X Open Community Portal";
+$mod_conf['license'] = "Public Domain";
+$mod_conf['image'] = "";
+
+$mod_conf['dir_nm'] = "login";
+$mod_conf['del_ind'] = 'n';
+
+// Dependencies
+$mod_conf['depend'][0] = "";
+
+// All tables should not have any prefix!
+//$mod_conf['sqlfile']['mysql'] = "sql/mysql.sql";
+//$mod_conf['sqlfile']['postgresql'] = "sql/pgsql.sql";
+
+// Tables created by sql file (without prefix!)
+$mod_conf['tables'][0] = "comments";
+$mod_conf['tables'][1] = "stories";
+$mod_conf['tables'][2] = "topics";
+
+// Blocks
+$mod_conf['blocks'][1]['file_nm'] = "login_form.php";
+$mod_conf['blocks'][1]['func_nm'] = "show_login_form";
+$mod_conf['blocks'][1]['pos_allow'] = "A|B|C|D|BC|CD|ABC|BCD|ABCD";
+
+
+?>@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@@
+
+
+1.1.1.1
+log
+@START CVS
+@
+text
+@@

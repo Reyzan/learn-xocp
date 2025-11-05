@@ -1,0 +1,90 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 xocp:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2002.11.21.23.20.13;	author adiet9000;	state dead;
+branches;
+next	1.1;
+
+1.1
+date	2002.11.19.19.57.22;	author adiet9000;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.11.19.19.57.22;	author adiet9000;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@--
+@
+text
+@<?php
+function xocpfwrite() {
+	if (isPost()) {
+	} else {
+		return false;
+	}
+	if (myRefererCheck($errstr)) {
+	} else {
+		return false;
+	}
+	return true;
+}
+
+function isPost() {
+	global $REQUEST_METHOD;
+	if ($REQUEST_METHOD == "POST" ) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function myRefererCheck(&$errstr) {
+	global $REQUEST_URI, $HTTP_REFERER, $HTTP_HOST, $SCRIPT_NAME;
+	$referer = $HTTP_REFERER;
+	if(strlen($referer) == 0) {
+		return false;
+	}
+	$filepath = (!empty($REQUEST_URI)) ? $REQUEST_URI : $SCRIPT_NAME;
+	$myurl = "http://".$HTTP_HOST.str_replace(basename($filepath),"",$filepath);
+	if (strpos($referer,$myurl) != 0 ) {
+		return false;
+	}
+	return true;
+}
+
+function myTextForm($url , $value) {
+	return "<form action='$url' method='post'><input type='submit' value='$value' /></form>\n";
+}
+?>@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@@
+
+
+1.1.1.1
+log
+@START CVS
+@
+text
+@@

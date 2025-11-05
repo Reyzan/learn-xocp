@@ -1,0 +1,78 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 xocp:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2002.11.20.14.39.33;	author adiet9000;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.11.19.19.57.42;	author adiet9000;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.11.19.19.57.42;	author adiet9000;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@new message handling method with XocpBlock
+@
+text
+@<?php
+//--------------------------------------------------------------------//
+// Filename : themes/plain/theme.php                                  //
+// Software : XOCP - X Open Community Portal                          //
+// Version  : 0.1                                                     //
+// Date     : 2002-11-17                                              //
+// Author   : (anybody)                                               //
+// License  : Public Domain                                           //
+//                                                                    //
+// You may use and modify this software as you wish. Share and Enjoy! //
+//--------------------------------------------------------------------//
+
+// To create theme, just define class named _theme that extends XocpTheme.
+// Overwrite some function if necessary. For documentation, please read
+// xocptheme.php and xocphtml.php in class directory.
+
+if ( !defined('THEME_X_DEFINED') ) {
+   define('THEME_X_DEFINED', TRUE);
+
+include_once(XOCP_DOC_ROOT."/class/xocptheme.php");
+
+class _theme extends XocpTheme {
+   
+}
+
+} // THEME_X_DEFINED
+?>@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d13 4
+@
+
+
+1.1.1.1
+log
+@START CVS
+@
+text
+@@

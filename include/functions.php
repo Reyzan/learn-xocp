@@ -1,0 +1,341 @@
+<?php
+//--------------------------------------------------------------------//
+// Filename : include/functions.php                                   //
+// Software : XOCP - X Open Community Portal                          //
+// Version  : 0.1                                                     //
+// Date     : 2002-11-13                                              //
+// Author   : (anybody)                                               //
+// License  : Public Domain                                           //
+//                                                                    //
+// You may use and modify this software as you wish. Share and Enjoy! //
+//--------------------------------------------------------------------//
+
+if ( !defined('XOCP_FUNCTIONS_DEFINED') ) {
+   define('XOCP_FUNCTIONS_DEFINED', TRUE);
+
+   // ################## Various functions from here ################
+
+   function debugit($cmd) {
+      error_log("$cmd\n",3,"/tmp/phplog");
+   }
+
+   function mylog_secure($cmd) {
+      error_log("$cmd\n",3,"/tmp/phplog_secure");
+   }
+
+   function dumpit($var) {
+      ob_start();
+      print_r($var);
+      debugit(ob_get_contents());
+      ob_end_clean();
+   }
+   
+   function catchVar($module) {
+      global $HTTP_GET_VARS,$HTTP_POST_VARS,$HTTP_COOKIE_VARS,$HTTP_SESSION_VARS;
+      global $xocp_page_id;
+
+      foreach($HTTP_GET_VARS as $key => $val) {
+         $v = explode("_",$key);
+         if($v[0] == "X") {
+            array_shift($v);
+            $m_nm = implode("_",$v);
+            if($m_nm == $module) {
+               return $val;
+            } else {
+               return NULL;
+            }
+         } elseif ($v[0] == "XP") {
+            $xocp_page_id = $v[1];
+            array_splice($v,0,2);
+            $m_nm = implode("_",$v);
+            if($m_nm == $module) {
+               return $val;
+            } else {
+               return NULL;
+            }
+         }
+      }
+
+      foreach($HTTP_POST_VARS as $key => $val) {
+         $v = explode("_",$key);
+         if($v[0] == "X") {
+            array_shift($v);
+            $m_nm = implode("_",$v);
+            if($m_nm == $module) {
+               return $val;
+            } else {
+               return NULL;
+            }
+         } elseif ($v[0] == "XP") {
+            $xocp_page_id = $v[1];
+            array_splice($v,0,2);
+            $m_nm = implode("_",$v);
+            if($m_nm == $module) {
+               return $val;
+            } else {
+               return NULL;
+            }
+         }
+      }
+   }
+
+   /*
+    * Function to display formatted times in user timezone
+    */
+   function formatTimestamp($time, $format="l", $timeoffset="") {
+      global $xocpConfig, $xocpUser;
+      if ( $timeoffset == "" ) {
+         if ( $xocpUser ) {
+            $timeoffset = $xocpUser->getVar("timezone_offset");
+         } else {
+            $timeoffset = $xocpConfig['default_TZ'];
+         }
+      }
+      $usertimestamp = $time + ($timeoffset - $xocpConfig['server_TZ'])*3600;
+      if ( $format == "s" ) {
+         $datestring = _SHORTDATESTRING;
+      } elseif ( $format == "m" ) {
+         $datestring = _MEDIUMDATESTRING;
+      } elseif ( $format == "l" ) {
+         $datestring = _DATESTRING;
+      } elseif ( $format == "mysql" ) {
+         $datestring = "Y-m-d H:i:s";
+      } elseif ( $format != "" ) {
+         $datestring = $format;
+      } else {
+         $datestring = _DATESTRING;
+      }
+      $datetime = date($datestring, $usertimestamp);
+      $datetime = ucfirst($datetime);
+      return $datetime;
+   }
+
+   /*
+    * Function to calculate server timestamp from user entered time (timestamp)
+    */
+   function userTimeToServerTime($timestamp, $userTZ=NULL){
+      global $xocpConfig;
+      if ( !isset($userTZ) ) {
+         $userTZ = $xocpConfig['default_TZ'];
+      }
+      $offset = $userTZ - $xocpConfig['server_TZ'];
+      $timestamp = $timestamp - ($offset * 3600);
+      return $timestamp;
+   }
+
+
+   function makePass() {
+      $makepass="";
+      $syllables = array("er","in","tia","wol","fe","pre","vet","jo","nes","al","len","son","cha","ir","ler","bo","ok","tio","nar","sim","ple","bla","ten","toe","cho","co","lat","spe","ak","er","po","co","lor","pen","cil","li","ght","wh","at","the","he","ck","is","mam","bo","no","fi","ve","any","way","pol","iti","cs","ra","dio","sou","rce","sea","rch","pa","per","com","bo","sp","eak","st","fi","rst","gr","oup","boy","ea","gle","tr","ail","bi","ble","brb","pri","dee","kay","en","be","se");
+      srand((double)microtime()*1000000);
+      for ($count=1;$count<=4;$count++) {
+         if (rand()%10 == 1) {
+            $makepass .= sprintf("%0.0f",(rand()%50)+1);
+         } else {
+            $makepass .= sprintf("%s",$syllables[rand()%62]);
+         }
+      }
+      return $makepass;
+   }
+
+   function checkIp($ip){
+      global $xocpBadIps;
+      if ( !empty($xocpBadIps) ) {
+         foreach ($xocpBadIps as $xbi) {
+            if ( !empty($xbi) && preg_match("/".$xbi."/", $ip)) {
+               return false;
+            }
+         }
+      }
+      return true;
+   }
+
+   function checkEmail($email){
+      if (!$email || !eregi("^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+([\.][a-z0-9-]+)+$",$email)){
+         return false;
+      }
+      return true;
+   }
+
+   function formatURL($url){
+      if (($url != "") && (!(eregi('(^http[s]*:[/]+)(.*)', $url)))){
+         $url = "http://" . $url;
+      }
+      return $url;
+   }
+
+   /*
+   * Prints allowed html tags on this site
+   */
+   function get_allowed_html(){
+      global $xocpConfig;
+      $allowed = str_replace(">","> ",$xocpConfig['allowed_html']);
+      return htmlspecialchars($allowed);
+   }
+
+
+   /*
+   * Just a simple wrap to php mail() function
+   */
+   function xocp_mail($to, $subject, $message, $headers=""){
+      global $xocpConfig;
+      if ( $headers == "" ) {
+         $headers = "From: ".$xocpConfig['sitename']." <".$xocpConfig['adminmail'].">\n";
+         $headers .= "X-Mailer: PHP/".phpversion()."\n";
+      }
+      mail($to, $subject, $message, $headers);
+   }
+
+   /*
+    * Function to display banners in all pages
+    */
+   function showbanner() {
+      global $xocpDB, $xocpConfig, $REMOTE_ADDR;
+      $bresult = $xocpDB->query("SELECT COUNT(*) FROM ".$xocpDB->prefix("banner")."");
+      list ($numrows) = $xocpDB->fetchRow($bresult);
+      if ( $numrows > 1 ) {
+         $numrows = $numrows-1;
+         mt_srand((double)microtime()*1000000);
+         $bannum = mt_rand(0, $numrows);
+      } else {
+         $bannum = 0;
+      }
+      if ( $numrows > 0 ) {
+         $bresult = $xocpDB->query("SELECT * FROM ".$xocpDB->prefix("banner")."",1,$bannum);
+         list ($bid, $cid, $imptotal, $impmade, $clicks, $imageurl, $clickurl, $date) = $xocpDB->fetchRow($bresult);
+         if ( $xocpConfig['my_ip']==$REMOTE_ADDR ) {
+            // EMPTY
+         } else {
+            $xocpDB->queryF("UPDATE ".$xocpDB->prefix("banner")." SET impmade=impmade+1 WHERE bid=$bid");
+         }
+         /* Check if this impression is the last one and print the banner */
+         if ( $imptotal == $impmade ) {
+            $newid = $xocpDB->genId($xocpDB->prefix("bannerfinish")."_bid_seq");
+            $xocpDB->queryF("INSERT INTO ".$xocpDB->prefix("bannerfinish")." (bid, cid, impressions, clicks, datestart, dateend) VALUES ($newid, $cid, $impmade, $clicks, $date, ".time().")");
+            $xocpDB->queryF("DELETE FROM ".$xocpDB->prefix("banner")." WHERE bid=".$bid."");
+         }
+         echo "<div><a href='".XOCP_URL."/banners.php?op=click&amp;bid=$bid' target='_blank'><img src='$imageurl' alt='' /></a></div>";
+      }
+   }
+
+
+
+   /*
+    * Function to get a user selected theme file
+    */
+   function getTheme($theme=""){
+      global $xocpConfig, $xocpDB, $xocpUser;
+      $themedir = XOCP_DOC_ROOT."/themes";
+      if ( !isset($theme) || trim($theme) == "" ) {
+         if ( $xocpUser ) {
+            $theme = $xocpUser->getVar("theme");
+            if ( isset($theme) && $theme != "" ) {
+               if ( file_exists($themedir."/".$theme."/theme.php") ) {
+                  return $theme;
+               }
+            } else {
+               return $xocpConfig['default_theme'];
+            }
+         } else {
+            return $xocpConfig['default_theme'];
+         }
+      } else {
+         $theme = trim($theme);
+         if ( file_exists($themedir/$theme/theme.php) ) {
+            return $theme;
+         }
+      }
+      return $xocpConfig['default_theme'];
+   }
+
+   /*
+    * Function to get css file for a certain theme
+    */
+   function getcss($whatdir) {
+      global $xocpConfig, $HTTP_USER_AGENT;
+      if(ereg('MSIE',$HTTP_USER_AGENT) && !ereg('Opera',$HTTP_USER_AGENT)){
+         $str_css = "style.css";
+      }else{
+         $str_css = "styleNN.css";
+      }
+      $themedir = XOCP_DOC_ROOT."/themes";
+      $filepath = "$themedir/$whatdir/style/$str_css";
+      $default = "$themedir/$whatdir/style/style.css";
+      if ( file_exists($filepath) ) {
+      //need to change to absolute path for inclusion from modules
+         $whatcss = XOCP_URL."/themes/$whatdir/style/$str_css";
+      } elseif ( file_exists($default) ) {
+         $whatcss = XOCP_URL."/themes/$whatdir/style/style.css";
+      } else {
+         $whatcss = "";
+      }
+      return $whatcss;
+   }
+
+   /*
+    * Function to display a message encouraging users
+    * to use web standards browser
+    */
+   function waspInfo() {
+      return "<p class='ahem'><small>This site will look MUCH better in a browser that supports <a title='The Web Standards Project&apos;s BROWSER UPGRADE initiative.' href='http://www.webstandards.org/upgrade/'>web standards</a>, but its content is accessible to any browser or Internet device.</small></p>";
+   }
+
+   function avatarExists($uid){
+      global $xocpConfig;
+      // recommend not to change this
+      $allowed_ext = array("gif", "jpeg", "jpg", "png");
+      foreach($allowed_ext as $ext){
+         if ( file_exists(XOCP_DOC_ROOT."/images/avatar/users/".$uid.".".$ext ) ) {
+            return "users/".$uid.".".$ext;
+         }
+      }
+      return false;
+   }
+
+   function &getMailer(){
+      if ( class_exists("XoopsMailerLocal") ) {
+         return new XoopsMailerLocal();
+      } else {
+         return new XoopsMailer();
+      }
+   }
+
+
+   function ss_timing_start ($name = 'default') {
+      global $ss_timing_start_times;
+      $ss_timing_start_times[$name] = explode(' ', microtime());
+   }
+
+   function ss_timing_stop ($name = 'default') {
+      global $ss_timing_stop_times;
+      $ss_timing_stop_times[$name] = explode(' ', microtime());
+   }
+
+   function ss_timing_current ($name = 'default') {
+      global $ss_timing_start_times, $ss_timing_stop_times;
+      if (!isset($ss_timing_start_times[$name])) {
+         return 0;
+      }
+      if (!isset($ss_timing_stop_times[$name])) {
+         $stop_time = explode(' ', microtime());
+      } else {
+         $stop_time = $ss_timing_stop_times[$name];
+      }
+      // do the big numbers first so the small ones aren't lost
+      $current = $stop_time[1] - $ss_timing_start_times[$name][1];
+      $current += $stop_time[0] - $ss_timing_start_times[$name][0];
+      return $current;
+   }
+
+   function ss_timing_result() {
+      $ret = "<div style='font-size: smaller;'>";
+      ss_timing_stop();
+      $ret .= sprintf("Page took %s seconds to load.",ss_timing_current());
+      $ret .= "</div>\n";
+      return $ret; 
+   }
+
+
+
+} // XOCP_FUNCTIONS_DEFINED
+?>

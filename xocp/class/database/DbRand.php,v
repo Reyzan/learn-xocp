@@ -1,0 +1,233 @@
+head     1.1;
+branch   1.1.1;
+access   ;
+symbols  start:1.1.1.1 xocp:1.1.1;
+locks    ; strict;
+comment  @# @;
+
+
+1.1
+date     2002.11.19.19.57.01;  author adiet9000;  state Exp;
+branches 1.1.1.1;
+next     ;
+
+1.1.1.1
+date     2002.11.19.19.57.01;  author adiet9000;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@<?
+/******************************************************************
+ class DbRand 
+ Description:
+	A redundant MySQL connection class
+ 	If RANDOMIZE is set and SLAVES are provided
+ 	all SELECT statements will be run off a random mysql connections.
+ 	If no slaves are present just use the MASTER connection
+ 	
+ Author: Vermonster SA
+ Maintainer: Jay Powers
+ Email: jay@@vermonster.com
+ Purpose: Provide an OO API for redundant MySQL connection
+ 
+ This software is now distributed under the terms of the 
+ Lesser GNU Public License
+ 
+ $Id: DbRand.php,v 1.7 2002/04/26 18:04:04 jpowers Exp $
+ 
+ Usage:
+ 
+ // Connection to MASTER
+ $object = new DbRand("10.0.0.1","login","pass","test");
+ 
+ $slaves = array (
+  array(host=>"192.168.0.2",user=>"foo",pass=>"bar",db=>"test"),
+  array(host=>"192.168.0.10",user=>"foo",pass=>"bar",db=>"test")
+ );
+ 
+ // Add the slaves into the mix and trigger random selects
+ $object->set_slaves($slaves,true);
+ 
+ 
+ $result = $object->db_query("SELECT username,email1 FROM users");
+
+ ******************************************************************/
+ 
+class DbRand {
+ 
+ // Define all global vars
+ var $MASTER = array();    // Master database
+ var $SLAVES = array();    // Slave databases
+ var $TIMEOUT;
+ var $SOCKET;
+ var $RANDOMIZE;
+    
+   function DbRand ($master, $login, $pass, $db, $timeout=5, $socket=true) {
+   // Initialize Global vars
+     $this->TIMEOUT     = $timeout;
+     $this->SOCKET      = $socket;
+     $this->MASTER      = array(host=>$master, user=>$login, pass=>$pass, db=>$db);
+   }
+   
+   
+   function set_slaves($slaves, $randomize=false) {
+   /* Set all the slaves
+    * merge MASTER and SLAVES for random SELECTS */
+      $this->SLAVES = $slaves;
+      $this->RANDOMIZE = $randomize;
+      array_unshift($this->SLAVES, $this->MASTER);
+   }
+   
+   function db_connect($db) {
+      /* This function is called from db_query.
+       * We need to see what type of query is being run */
+       
+       if ($fp = fsockopen($db['host'], 3306, &$errno, &$errstr, $this->TIMEOUT)) {
+           
+           if (!$this->LINK_ID = mysql_connect($db['host'], $db['user'], $db['pass'])) {
+           
+            echo "<h4>Can't connect to" . $db['host'] ." as " . $db['user'] . "</h4>";
+            echo "<b>MySQL Error</b>: ", mysql_error();
+            die();
+           
+           }
+           
+           mysql_select_db($db['db']) or die("Could not select database");
+           
+           fclose($fp);
+
+        } else {
+         // Could not open connection.  Lets try again?
+         $this->db_query($this->QUERY);
+        }
+        
+        return $this->LINK_ID;
+   }   
+   
+   function db_query($query, $debug=false, $die_on_debug=true) {
+   /* Run the query $query against the current database.  if $debug is true, then
+    * we will just display the query on screen including host info.
+    * Check for SELECT statments and if SLAVES & RANDOMIZE are set.  If so, run
+    * query against random db host.*/
+      
+      $this->QUERY = $query;
+      
+      if (eregi("^select", $query) & $this->RANDOMIZE & $this->SLAVES) {
+         
+         // Set the random number
+         srand ((float) microtime() * 10000000);
+         // Choose a random Database host
+         $rand_host = array_rand($this->SLAVES);
+         
+         $this->LINK_ID = $this->db_connect($this->SLAVES[$rand_host]);
+         
+         // Now the slave is the MASTER (For display)
+         $this->MASTER = $this->SLAVES[$rand_host];
+      } else {
+          
+          // Use the Master Connection
+          $this->LINK_ID = $this->db_connect($this->MASTER);
+      
+      }
+      
+      if ($debug) {
+         echo "<pre>" . "LINK " . $this->LINK_ID . " <BR>Query: ".  htmlspecialchars($query) . " <BR>HOST: " . $this->MASTER['host'] . "</pre>";
+
+         if ($die_on_debug) die;
+      }
+      
+    return mysql_query($query, $this->LINK_ID);
+    
+   }
+   
+   function db_fetch_array($result) {
+   /* return next row as an associative array
+   return FALSE when ther are no more results*/
+
+      return mysql_fetch_array($result);
+   }
+
+   function db_fetch_row($result) {
+   /* return next row as an array
+   return FALSE when ther are no more results*/
+
+      return mysql_fetch_row($result);
+   }
+
+   function db_fetch_object($result) {
+   /* return next row as an object
+   return FALSE when ther are no more results*/
+      return mysql_fetch_object($result);
+   }
+
+   function db_num_rows($result) {
+   /* return the number of (rows) returned from the SELECT query with
+    * the query result identifier $result. */
+
+      return mysql_num_rows($result);
+   }
+
+   function db_affected_rows() {
+   /* return the number of rows affected by the last INSERT, UPDATE, or DELETE
+    * query */
+
+      return mysql_affected_rows();
+   }
+
+   function db_insert_id() {
+   /* if you just INSERTed a new row into a table with an autonumber, call this
+    * function to give you the ID of the new autonumber value */
+
+      return mysql_insert_id();
+   }
+
+   function db_free_result($result) {
+   /* free up the resources used by the query result identifier $result */
+
+      mysql_free_result($result);
+   }
+
+   function db_num_fields($result) {
+   /* return the number of fields returned from the SELECT query with the
+    * identifier $result */
+
+      return mysql_num_fields($result);
+   }
+
+   function db_field_name($result, $field) {
+   /* return the name of the field number $field returned from the SELECT query
+    * with the identifier $result */
+
+      return mysql_field_name($result, $field);
+   }
+
+   function db_data_seek($result, $row) {
+   /* move the database cursor to row $row on the SELECT query with the identifier
+    * $result */
+
+      if (db_num_rows($result)) { return mysql_data_seek($result, $row); }
+   } 
+
+   
+}// END class DB
+?>
+@
+
+
+1.1.1.1
+log
+@START CVS
+@
+text
+@@

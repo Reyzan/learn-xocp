@@ -1,0 +1,45 @@
+head	1.1;
+access;
+symbols;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2002.11.21.22.56.11;	author adiet9000;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Cara instal dab!
+@
+text
+@
+Installing the Package (valid only for MySQL)
+--------------------------------------------------------------
+
+Untar the package into the directory you want to use on you web
+server, if you're unsure where that is, ask you system administrator.
+
+tar -zxvf xocp.tar.gz
+
+Now go to the directory where you uncompressed all files and edit the
+file "config.php". Change all the fields until you are happy with the
+changes and they fits the need of your web site. Give special attention
+to the database configuration section. Then run:
+
+    mysqladmin create database_name
+    
+Now fill the databases with the tables in mysql.sql file:
+
+    mysql database_name < mysql.sql
+
+That's it!...
+
+@

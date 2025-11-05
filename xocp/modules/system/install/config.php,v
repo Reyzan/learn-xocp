@@ -1,0 +1,109 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 xocp:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2002.11.20.14.39.33;	author adiet9000;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.11.19.19.57.36;	author adiet9000;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.11.19.19.57.36;	author adiet9000;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@new message handling method with XocpBlock
+@
+text
+@<?php
+$mod_conf['module_id'] = "system";
+$mod_conf['version'] = 1.01;
+$mod_conf['description'] = _SYS_MODULE_DESC;
+$mod_conf['credits'] = "X Open Community Portal";
+$mod_conf['license'] = "Public Domain";
+
+$mod_conf['del_ind'] = 'n';
+
+// Dependencies
+//$mod_conf['depend'][0] = "";
+
+// All tables should not have any prefix!
+//$mod_conf['sqlfile']['mysql'] = "sql/mysql.sql";
+//$mod_conf['sqlfile']['postgresql'] = "sql/pgsql.sql";
+
+// Tables created by sql file (without prefix!)
+//$mod_conf['tables'][0] = "comments";
+//$mod_conf['tables'][1] = "stories";
+//$mod_conf['tables'][2] = "topics";
+
+// Blocks
+$mod_conf['blocks'][1]['file_nm'] = "login.php";
+$mod_conf['blocks'][1]['class_nm'] = "_system_Login";
+$mod_conf['blocks'][1]['side_allow'] = "A|B|C|D|BC|CD|ABC|BCD|ABCD";
+
+$mod_conf['blocks'][2]['file_nm'] = "whoami.php";
+$mod_conf['blocks'][2]['class_nm'] = "_system_Whoami";
+$mod_conf['blocks'][2]['side_allow'] = "A|B|C|D|BC|CD|ABC|BCD|ABCD";
+
+$mod_conf['blocks'][3]['file_nm'] = "admin/cache/upload.php";
+$mod_conf['blocks'][3]['class_nm'] = "_system_CacheUpload";
+$mod_conf['blocks'][3]['side_allow'] = "BC|CD|ABC|BCD|ABCD";
+
+
+?>@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d2 1
+a2 1
+$mod_conf['module_nm'] = "Login";
+d4 1
+a4 1
+$mod_conf['description'] = _LOGIN_MODULE_DESC;
+a6 1
+$mod_conf['image'] = "";
+a7 1
+$mod_conf['dir_nm'] = "login";
+d11 1
+a11 1
+$mod_conf['depend'][0] = "";
+d18 3
+a20 3
+$mod_conf['tables'][0] = "comments";
+$mod_conf['tables'][1] = "stories";
+$mod_conf['tables'][2] = "topics";
+d23 11
+a33 3
+$mod_conf['blocks'][1]['file_nm'] = "login_form.php";
+$mod_conf['blocks'][1]['func_nm'] = "show_login_form";
+$mod_conf['blocks'][1]['pos_allow'] = "A|B|C|D|BC|CD|ABC|BCD|ABCD";
+@
+
+
+1.1.1.1
+log
+@START CVS
+@
+text
+@@

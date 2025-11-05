@@ -1,0 +1,106 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 xocp:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2002.11.21.23.20.13;	author adiet9000;	state dead;
+branches;
+next	1.1;
+
+1.1
+date	2002.11.19.19.56.19;	author adiet9000;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.11.19.19.56.19;	author adiet9000;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@--
+@
+text
+@/*
+class XocpScript {
+   var $top;
+   var $script;
+   
+   function XocpScript($top=TRUE) {
+      $this->top = $top;
+   }
+   
+   function location($top=NULL) {
+      if($top != NULL) {
+         $this->top = $top;
+      } else {
+         return $this->top;
+      }
+   }
+   
+   function set($text) {
+      $this->script = $text;
+   }
+   
+   function load($filename) {
+      if(file_exists($filename)) {
+         $this->script = fread(fopen($filename, 'rb'), filesize($filename));
+      }
+   }
+   
+   function render() {
+      return $this->script;
+   }
+}
+
+*/
+
+class XocpCSS {
+   var $css;
+   
+   function XocpCSS($text = "") {
+      $this->css = $text;
+   }
+   
+   function set($text) {
+      $this->css = $text;
+   }
+   
+   function load($filename) {
+      if(file_exists($filename)) {
+         $this->css = fread(fopen($filename, 'rb'), filesize($filename));
+      }
+   }
+   
+   function render() {
+      return $this->css;
+   }
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@@
+
+
+1.1.1.1
+log
+@START CVS
+@
+text
+@@

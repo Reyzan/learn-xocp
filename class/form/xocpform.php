@@ -1,0 +1,869 @@
+<?php
+//--------------------------------------------------------------------//
+// Software : XOCP - X Open Community Portal                          //
+// Version  : 0.1                                                     //
+// Date     : 2002-11-09                                              //
+// Author   : (anybody)                                               //
+// License  : Public Domain                                           //
+//                                                                    //
+// You may use and modify this software as you wish. Share and Enjoy! //
+//--------------------------------------------------------------------//
+
+if ( !defined('XOCP_FORM_DEFINED') ) {
+   define('XOCP_FORM_DEFINED', TRUE);
+
+//--------------------------------------------------------------------//
+// XocpForm                                                           //
+//--------------------------------------------------------------------//
+
+class XocpForm {
+   // private
+   var $action;
+
+   //private
+   var $method;
+
+   //private
+   var $name;
+
+   //private
+   var $title;
+
+   // private
+   // array of form element objects
+   var $elements = array();
+
+   // private
+   var $extra;
+
+   // private
+   // required elements
+   var $required = array();
+
+   // public
+   function XocpForm($title, $name, $action, $method="post"){
+      $this->title = $title;
+      $this->name = $name;
+      $this->action = $action;
+      $this->method = $method;
+   }
+
+   // public
+   function getTitle(){
+      return $this->title;
+   }
+
+   // public
+   function getName(){
+      return $this->name;
+   }
+
+   // public
+   function getAction(){
+      return $this->action;
+   }
+
+   // public
+   function getMethod(){
+      return $this->method;
+   }
+
+   // public
+   function addElement($ele){
+      $this->elements[] = $ele;
+   }
+
+   // public
+   function getElements(){
+      return $this->elements;
+   }
+
+   function setExtra($extra){
+      $this->extra = " ".$extra;
+   }
+
+   function getExtra(){
+      if (isset($this->extra)) {
+         return $this->extra;
+      }
+   }
+
+   function setRequired($required){
+      if ( is_array($required) ) {
+         foreach ( $required as $req ) {
+            $this->required[] = $req;
+         }
+      } else {
+         $this->required[] = $required;
+      }
+   }
+
+   function getRequired(){
+      return $this->required;
+   }
+
+   // public abstract
+   // returns renderered form
+   function render(){
+   }
+
+   // public
+   // displays rendered form
+   function display(){
+      echo $this->render();
+   }
+}
+
+//--------------------------------------------------------------------//
+// XocpFormElement                                                    //
+//--------------------------------------------------------------------//
+
+class XocpFormElement {
+
+   // private
+   var $name;
+
+   // private
+   var $caption;
+
+   // private
+   var $hidden = false;
+
+   // private
+   var $extra;
+
+   // private
+   var $required = false;
+
+   //public
+   function XocpFormElement(){
+      die("This class cannot be instantiated!");
+   }
+
+   // public
+   function setName($name) {
+      $this->name = $name;
+   }
+
+   // public
+   function getName($encode=true) {
+      if ($encode) {
+         return str_replace("&amp;", "&", str_replace("'","&#039;",htmlspecialchars($this->name)));
+      }
+      return $this->name;
+   }
+
+   // public
+   function setCaption($caption) {
+      $this->caption = $caption;
+   }
+
+   // public
+   function getCaption() {
+      return $this->caption;
+   }
+
+   // public
+   function setHidden() {
+      $this->hidden = true;
+   }
+
+   // public
+   function isHidden() {
+      return $this->hidden;
+   }
+
+   // public
+   function setExtra($extra){
+      $this->extra = " ".$extra;
+   }
+
+   // public
+   function getExtra(){
+      if (isset($this->extra)) {
+         return $this->extra;
+      }
+   }
+
+   // abstract
+   function render(){
+   }
+}
+
+//--------------------------------------------------------------------//
+// XocpFormButton                                                     //
+//--------------------------------------------------------------------//
+
+class XocpFormButton extends XocpFormElement {
+
+   // private
+   var $value;
+
+   // private
+   // this could be either "button", "submit", or "reset"
+   var $type;
+
+   // public
+   function XocpFormButton($caption, $name, $value="", $type="button"){
+      $this->setCaption($caption);
+      $this->setName($name);
+      $this->type = $type;
+      $this->value = $value;
+   }
+
+   // public
+   function getValue(){
+      return $this->value;
+   }
+
+   // public
+   function getType(){
+      return $this->type;
+   }
+
+   // public
+   function render(){
+      return "<input type='".$this->getType()."' name='".$this->getName()."' id='".$this->getName()."' value='".$this->getValue()."'".$this->getExtra()." class='bt' />";
+   }
+}
+
+//--------------------------------------------------------------------//
+// XocpFormCheckBox                                                   //
+//--------------------------------------------------------------------//
+
+class XocpFormCheckBox extends XocpFormElement {
+
+   // private
+   var $options = array();
+
+   // private
+   // pre-selected values in array
+   var $value = array();
+
+   // public
+   function XocpFormCheckBox($caption, $name, $value=""){
+      $this->setCaption($caption);
+      $this->setName($name);
+      if ( $value != "" ) {
+         if ( is_array($value) ) {
+            foreach ( $value as $v ) {
+               $this->value[] = $v;
+            }
+         } else {
+            $this->value[] = $value;
+         }
+      }
+   }
+
+   // public
+   function getValue(){
+      return $this->value;
+   }
+
+   // public
+   function addOption($value, $name=""){
+      if ( $name != "" ) {
+         $this->options[$value] = $name;
+      } else {
+         $this->options[$value] = $value;
+      }
+   }
+
+   // public
+   function addOptionArray($arr){
+      if ( is_array($arr) ) {
+         foreach ( $arr as $k=>$v ) {
+            $this->addOption($k, $v);
+         }
+      }
+   }
+
+   // public
+   function getOptions(){
+      return $this->options;
+   }
+
+   // public
+   function render(){
+      $ret = "";
+      if ( count($this->getOptions()) > 1 && substr($this->getName(), -2, 2) != "[]" ) {
+         $newname = $this->getName()."[]";
+         $this->setName($newname);
+      }
+      foreach ( $this->getOptions() as $value => $name ) {
+         
+         $ret .= "<input type='checkbox' name='".$this->getName()."' id='".$this->getName()."' value='".$value."'";
+         $count = count($this->getValue());
+         if ( $count > 0 && in_array($value, $this->getValue()) ) {
+            $ret .= " checked='checked'";
+         }
+         $ret .= $this->getExtra()." />".$name."\n";
+      }
+      return $ret;
+   }
+}
+
+
+//--------------------------------------------------------------------//
+// XocpFormElementTray                                                //
+//--------------------------------------------------------------------//
+
+class XocpFormElementTray extends XocpFormElement {
+
+   // private
+   // array of form element objects
+   var $elements = array();
+
+   // private
+   var $delimeter;
+
+   // public
+   function XocpFormElementTray($caption, $delimeter="&nbsp;"){
+      $this->setCaption($caption);
+      $this->delimeter = $delimeter;
+   }
+
+   // public
+   function addElement($ele){
+      $this->elements[] = $ele;
+   }
+
+   // public
+   function getElements(){
+      return $this->elements;
+   }
+
+   // public
+   function getDelimeter(){
+      return $this->delimeter;
+   }
+
+   // public
+   function render(){
+      $count = 0;
+      $ret = "";
+      foreach ( $this->getElements() as $ele ) {
+         if ( $count > 0 ) {
+            $ret .= $this->getDelimeter();
+         }
+         $ret .= $ele->getCaption()."&nbsp;".$ele->render()."\n";
+         $count++;
+      }
+      return $ret;
+   }
+}
+
+
+//--------------------------------------------------------------------//
+// XocpFormFile                                                       //
+//--------------------------------------------------------------------//
+
+class XocpFormFile extends XocpFormElement {
+
+   //private
+   var $maxFileSize;
+
+   // public
+   function XocpFormFile($caption, $name, $maxfilesize){
+      $this->setCaption($caption);
+      $this->setName($name);
+      $this->maxFileSize = intval($maxfilesize);
+   }
+
+   // public
+   function getMaxFileSize(){
+      return $this->maxFileSize;
+   }
+
+   // public
+   function render(){
+      return "<input type='hidden' name='MAX_FILE_SIZE' value='".$this->getMaxFileSize()."' /><input type='file' name='".$this->getName()."' id='".$this->getName()."'".$this->getExtra()." /><input type='hidden' name='xocp_upload_file[]' id='xocp_upload_file[]' value='".$this->getName()."' />";
+   }
+}
+
+
+//--------------------------------------------------------------------//
+// XocpFormHidden                                                     //
+//--------------------------------------------------------------------//
+
+class XocpFormHidden extends XocpFormElement {
+
+   // private
+   var $value;
+
+   // public
+   function XocpFormHidden($name, $value){
+      $this->setName($name);
+      $this->setHidden();
+      $this->value = $value;
+      $this->setCaption("");
+   }
+
+   // public
+   function getValue(){
+      return $this->value;
+   }
+
+   // public
+   function render($value=""){
+      return "<input type='hidden' name='".$this->getName()."' id='".$this->getName()."' value='".$this->getValue()."' />";
+   }
+}
+
+
+//--------------------------------------------------------------------//
+// XocpFormLabel                                                      //
+//--------------------------------------------------------------------//
+
+class XocpFormLabel extends XocpFormElement {
+
+   // private
+   var $value;
+
+   function XocpFormLabel($caption="", $value=""){
+      $this->setCaption($caption);
+      $this->value = $value;
+   }
+
+   // public
+   function getValue(){
+      return $this->value;
+   }
+
+   function render(){
+      return $this->getValue();
+   }
+}
+
+
+//--------------------------------------------------------------------//
+// XocpFormPassword                                                   //
+//--------------------------------------------------------------------//
+
+class XocpFormPassword extends XocpFormElement {
+
+   // private
+   var $size;
+
+   //private
+   var $maxlength;
+
+   //private
+   var $value;
+
+   // public
+   function XocpFormPassword($caption, $name, $size, $maxlength, $value=""){
+      $this->setCaption($caption);
+      $this->setName($name);
+      $this->size = intval($size);
+      $this->maxlength = intval($maxlength);
+      $this->value = $value;
+   }
+
+   // public
+   function getSize(){
+      return $this->size;
+   }
+
+   // public
+   function getMaxlength(){
+      return $this->maxlength;
+   }
+
+   // public
+   function getValue(){
+      return $this->value;
+   }
+
+   // public
+   function render(){
+      return "<input type='password' name='".$this->getName()."' id='".$this->getName()."' size='".$this->getSize()."' maxlength='".$this->getMaxlength()."' value='".$this->getValue()."'".$this->getExtra()." />";
+   }
+}
+
+
+//--------------------------------------------------------------------//
+// XocpFormRadio                                                      //
+//--------------------------------------------------------------------//
+
+class XocpFormRadio extends XocpFormElement {
+
+   // private
+   var $options = array();
+
+   // private
+   // pre-selected value
+   var $value;
+
+   // public
+   function XocpFormRadio($caption, $name, $value=NULL){
+      $this->setCaption($caption);
+      $this->setName($name);
+      $this->value = $value;
+   }
+
+   // public
+   function getValue(){
+      return $this->value;
+   }
+
+   // public
+   function addOption($value, $name=""){
+      if ( $name != "" ) {
+         $this->options[$value] = $name;
+      } else {
+         $this->options[$value] = $value;
+      }
+   }
+
+   // public
+   function addOptionArray($arr){
+      if ( is_array($arr) ) {
+         foreach ( $arr as $k=>$v ) {
+            $this->addOption($k, $v);
+         }
+      }
+   }
+
+   // public
+   function getOptions(){
+      return $this->options;
+   }
+
+   // public
+   function render(){
+      $ret = "";
+      foreach ( $this->getOptions() as $value => $name ) {
+         $ret .= "<input type='radio' name='".$this->getName()."' id='".$this->getName()."' value='".$value."'";
+         $selected = $this->getValue();
+         if ( isset($selected) && ($value == $selected) ) {
+            $ret .= " checked='checked'";
+         }
+         $ret .= $this->getExtra()." />".$name."\n";
+      }
+      return $ret;
+   }
+}
+
+//--------------------------------------------------------------------//
+// XocpFormRadioYN                                                    //
+//--------------------------------------------------------------------//
+
+class XocpFormRadioYN extends XocpFormRadio {
+
+   function XocpFormRadioYN($caption, $name, $value=NULL, $yes=_YES, $no=_NO){
+      $this->XocpFormRadio($caption, $name, $value);
+      $this->addOption(1, $yes);
+      $this->addOption(0, $no);
+   }
+}
+
+//--------------------------------------------------------------------//
+// XocpFormSelect                                                     //
+//--------------------------------------------------------------------//
+
+class XocpFormSelect extends XocpFormElement {
+
+   // private
+   var $options = array();
+
+   // private
+   var $multiple = false;
+
+   // private
+   var $size;
+
+   // private
+   // pre-selected values in array
+   var $value = array();
+
+   // public
+   function XocpFormSelect($caption, $name, $value="", $size=1, $multiple=false){
+      $this->setCaption($caption);
+      $this->setName($name);
+      $this->multiple = $multiple;
+      $this->size = intval($size);
+      if ( $value != "" ) {
+         if ( is_array($value) ) {
+            foreach ( $value as $v ) {
+               $this->value[] = $v;
+            }
+         } else {
+            $this->value[] = $value;
+         }
+      }
+   }
+
+   // public
+   function isMultiple(){
+      return $this->multiple;
+   }
+
+   // public
+   function getSize(){
+      return $this->size;
+   }
+
+   // public
+   function getValue(){
+      return $this->value;
+   }
+
+   // public
+   function addOption($value, $name=""){
+      if ( $name != "" ) {
+         $this->options[$value] = $name;
+      } else {
+         $this->options[$value] = $value;
+      }
+   }
+
+   // public
+   function addOptionArray($arr){
+      if ( is_array($arr) ) {
+         foreach ( $arr as $k=>$v ) {
+            $this->addOption($k, $v);
+         }
+      }
+   }
+
+   // public
+   function getOptions(){
+      return $this->options;
+   }
+
+   // public
+   function render(){
+      $ret = "<select  size='".$this->getSize()."'".$this->getExtra()."";
+      if ( $this->isMultiple() != false ) {
+         $ret .= " name='".$this->getName()."[]' id='".$this->getName()."[]' multiple='multiple'>\n";
+      } else {
+         $ret .= " name='".$this->getName()."' id='".$this->getName()."'>\n";
+      }
+      foreach ( $this->getOptions() as $value => $name ) {
+         $ret .= "<option value='".htmlspecialchars($value, ENT_QUOTES)."'";
+         $count = count($this->getValue());
+         if ( $count > 0 && in_array($value, $this->getValue()) ) {
+               $ret .= " selected='selected'";
+         }
+         $ret .= ">".$name."</option>\n";
+      }
+      $ret .= "</select>";
+      return $ret;
+   }
+}
+
+
+//--------------------------------------------------------------------//
+// XocpFormText                                                       //
+//--------------------------------------------------------------------//
+
+class XocpFormText extends XocpFormElement {
+
+   // private
+   var $size;
+
+   //private
+   var $maxlength;
+
+   //private
+   var $value;
+
+   // public
+   function XocpFormText($caption, $name, $size, $maxlength, $value=""){
+      $this->setCaption($caption);
+      $this->setName($name);
+      $this->size = intval($size);
+      $this->maxlength = intval($maxlength);
+      $this->value = $value;
+   }
+
+   // public
+   function getSize(){
+      return $this->size;
+   }
+
+   // public
+   function getMaxlength(){
+      return $this->maxlength;
+   }
+
+   // public
+   function getValue(){
+      return $this->value;
+   }
+
+   // public
+   function render(){
+      return "<input type='text' name='".$this->getName()."' id='".$this->getName()."' size='".$this->getSize()."' maxlength='".$this->getMaxlength()."' value='".$this->getValue()."'".$this->getExtra()." />";
+   }
+}
+
+
+//--------------------------------------------------------------------//
+// XocpFormTextArea                                                   //
+//--------------------------------------------------------------------//
+
+class XocpFormTextArea extends XocpFormElement {
+   // private
+   var $cols;
+
+   //private
+   var $rows;
+
+   //private
+   var $value;
+
+   // public
+   function XocpFormTextArea($caption, $name, $value="", $rows=5, $cols=50){
+      $this->setCaption($caption);
+      $this->setName($name);
+      $this->rows = intval($rows);
+      $this->cols = intval($cols);
+      $this->value = $value;
+   }
+
+   // public
+   function getRows(){
+      return $this->rows;
+   }
+
+   // public
+   function getCols(){
+      return $this->cols;
+   }
+
+   // public
+   function getValue(){
+      return $this->value;
+   }
+
+   // public
+   function render($value=""){
+      return "<textarea name='".$this->getName()."' id='".$this->getName()."' rows='".$this->getRows()."' cols='".$this->getCols()."'".$this->getExtra().">".$this->getValue()."</textarea>";
+   }
+}
+
+////////////////////////////////////////////////////////////////////////
+
+//--------------------------------------------------------------------//
+// XocpSimpleForm                                                     //
+//--------------------------------------------------------------------//
+
+class XocpSimpleForm extends XocpForm {
+
+   function XocpSimpleForm($title, $name, $action, $method="post"){
+      $this->XocpForm($title, $name, $action, $method="post");
+   }
+
+   function render(){
+      $ret = $this->getTitle()."\n<form name='".$this->getName()."' id='".$this->getName()."' action='".$this->getAction()."' method='".$this->getMethod()."'".$this->getExtra().">\n";
+      foreach ( $this->getElements() as $ele ) {
+         if ( !$ele->isHidden() ) {
+            $ret .= "<b>".$ele->getCaption()."</b><br />".$ele->render()."<br />\n";
+         } else {
+            $ret .= $ele->render()."\n";
+         }
+      }
+      $ret .= "</form>\n";
+      return $ret;
+   }
+}
+
+
+//--------------------------------------------------------------------//
+// XocpTableForm                                                      //
+//--------------------------------------------------------------------//
+
+class XocpTableForm extends XocpForm {
+
+   function XocpTableForm($title, $name, $action, $method="post"){
+      $this->XocpForm($title, $name, $action, $method="post");
+   }
+
+   function render(){
+      $ret = $this->getTitle()."\n<form name='".$this->getName()."' id='".$this->getName()."' action='".$this->getAction()."' method='".$this->getMethod()."'".$this->getExtra().">\n<table border='0' width='100%'>\n";
+      $hidden = "";
+      foreach ( $this->getElements() as $ele ) {
+         if ( !$ele->isHidden() ) {
+            $ret .= "<tr valign='top' align='right'><td nowrap='nowrap'>".$ele->getCaption()."</td><td>".$ele->render()."</td></tr>\n";
+         } else {
+            $hidden .= $ele->render()."\n";
+         }
+      }
+      $ret .= "</table>\n".$hidden."\n</form>\n";
+      return $ret;
+   }
+}
+
+
+//--------------------------------------------------------------------//
+// XocpThemeForm                                                      //
+//--------------------------------------------------------------------//
+
+class XocpThemeForm extends XocpForm {
+   var $align;
+   var $valign;
+   var $comment;
+   var $js = TRUE;
+   
+   function XocpThemeForm($caption, $name, $action, $method="post", $js=FALSE){
+      $this->XocpForm($caption, $name, $action, $method);
+      $this->js = $js;
+      if($this->js) {
+         $this->setExtra("onsubmit='return xocpFormValidate_".$this->getName()."();'");
+      }
+   }
+   
+   function setComment($text) {
+      $this->comment = $text;
+   }
+
+   function setAlign($align) {
+      $this->align = $align;
+   }
+
+   function setValign($valign) {
+      $this->valign = $valign;
+   }
+
+   function render($value=""){
+      $required = $this->getRequired();
+      $ret = "\n<!-- OpenForm --><form name='".$this->getName()."' id='".$this->getName()."' action='".$this->getAction()."' method='".$this->getMethod()."'".$this->getExtra().">\n";
+      $ret .= _theme::openForm($this->align,$this->valign);
+      $ret .= "<tr><td colspan=2 class='ft'>".$this->getTitle()."</td></tr>\n";
+      $hidden = "";
+      foreach ( $this->getElements() as $ele ) {
+         if ( !$ele->isHidden() ) {
+            $ret .= "<tr valign='top'><td class='ca'>&nbsp;".$ele->getCaption()."</td><td class='in'>".$ele->render()."</td></tr>\n";
+         } else {
+            $hidden .= $ele->render()."\n";
+         }
+      }
+      
+      if($this->comment != '') {
+         $ret .= "<tr><td colspan=2 class='cm'>".$this->comment."</td></tr>\n";
+      }
+      
+      $js = "
+      <script language='javascript'>
+      <!--
+      function xocpFormValidate_".$this->getName()."(){";
+      foreach ( $required as $req ) {
+         $js .= "if ( document.".$this->getName().".".$req.".value == \"\" ){alert( \"".sprintf(_FORM_ENTER, $req)."\" );document.".$this->getName().".".$req.".focus();return false;}";
+      }
+      $js .= "}
+      //--->
+      </script>";
+      $ret .= _theme::closeForm().$hidden."\n<!-- CloseForm --></form>\n";
+      if($this->js) {
+         return $js.$ret;
+      } else {
+         return $ret;
+      }
+   }
+}
+
+
+} // XOCP_FORM_DEFINED
+?>

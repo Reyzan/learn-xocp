@@ -1,0 +1,165 @@
+head	1.3;
+access;
+symbols
+	start:1.1.1.1 xocp:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.3
+date	2002.11.21.23.18.52;	author adiet9000;	state dead;
+branches;
+next	1.2;
+
+1.2
+date	2002.11.20.14.39.32;	author adiet9000;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.11.19.19.57.51;	author adiet9000;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.11.19.19.57.51;	author adiet9000;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@-
+@
+text
+@<?php
+/*********************************************************************
+Remember to chmod 666 this file in order to let the system write to it properly.
+If you can't change the permissions you can edit the rest of this file by hand.
+*********************************************************************/
+
+// Site name
+$xocpConfig['sitename'] = "XOCP Site";
+
+// Slogan for your site
+$xocpConfig['slogan'] = "XOCP Site";
+
+// Admin mail address
+$xocpConfig['adminmail'] = "adiet@@192.168.1.17";
+
+// Default language
+$xocpConfig['language'] = "english";
+
+// Module for your start page
+$xocpConfig['startpage'] = "guest.php";
+
+// Default theme
+$xocpConfig['default_theme'] = "plain";
+
+// Allow users to select theme? (1=Yes 0=No)
+$xocpConfig['allow_theme'] = 1;
+
+// Username for anonymous users
+$xocpConfig['anonymous'] = "Guest";
+
+// Minimum length of password required
+$xocpConfig['minpass'] = 5;
+
+// Allow anonymous users to post comments? (1=Yes 0=No)
+$xocpConfig['anonpost'] = 0;
+
+// Allow HTML tags in user comments? (1=Yes 0=No)
+$xocpConfig['allow_html'] = 0;
+
+// Notify by mail when a new user is registered? (1=Yes 0=No)
+$xocpConfig['new_user_notify'] = 0;
+// Notify to group:
+$xocpConfig['new_user_notify_group'] = 1;
+
+// Allow users to delete own account? (1=Yes 0=No)
+$xocpConfig['self_delete'] = 0;
+
+// Display loading.. image? (1=Yes 0=No) 
+$xocpConfig['display_loading_img'] = 0;
+
+// Use gzip compression? PHP version 4.0.5 or higher recommended. Your server version is 4.0.6 (1=Yes 0=No) 
+$xocpConfig['gzip_compression'] = 0;
+
+// How strict should the allowed chars for username be?   (Strict (only alphabets and numbers)=0 Medium=1 Light (recommended for multi-byte chars)=2)
+$xocpConfig['uname_test_level'] = 0;
+
+// Name for user cookies. This cookie contains only a user name and is saved in a user pc for a year (if the user wishes). If a user have this cookie, username will be automatically inserted in the login box.
+$xocpConfig['usercookie'] = "xocp_user";
+
+// Name for session cookies. This cookie enables a user to automatically login until session expires or the user logs out.
+$xocpConfig['sessioncookie'] = "xocp_session";
+
+// Maximum duration of session idle time in seconds
+$xocpConfig['sessionexpire'] = 4500;
+
+// Server timezone
+$xocpConfig['server_TZ'] = -12;
+
+// Default timezone
+$xocpConfig['default_TZ'] = -12;
+
+// Activate banner ads? (1=Yes 0=No)
+$xocpConfig['banners'] = 1;
+
+// Enable debug mode? (Turn this on to display all SQL errors for debug only. A running website should have this turned off.) (1=Yes 0=No)
+$xocpConfig['debug_mode'] = 0;
+
+// Default Comment Display Mode (0=No Comments flat=Flat thread=Threaded)
+$xocpConfig['com_mode'] = "flat";
+
+// Default Comments Display Order (0=Oldest First 1=Newest First)
+$xocpConfig['com_order'] = 1;
+
+// Your IP. This ip will not counted as impression for banners 
+$xocpConfig['my_ip'] = "192.168.1.235";
+
+// Allow custom avatar upload? (1=Yes 0=No)
+$xocpConfig['avatar_allow_upload'] = 0;
+// Avatar image max width
+$xocpConfig['avatar_width'] = 120;
+// Avatar image max height
+$xocpConfig['avatar_height'] = 120;
+// Avatar image max filesize (bytes)
+$xocpConfig['avatar_maxsize'] = 15000;
+
+// HTML tags allowed in all posts.
+$xocpConfig['allowed_html'] = "<a><b><big><blockquote><font><hr><i><img><li><small><strong><table><tbody><td><tfoot><th><thead><tr><tt><ul>";
+
+?>@
+
+
+1.2
+log
+@new message handling method with XocpBlock
+@
+text
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d20 1
+a20 1
+$xocpConfig['startpage'] = "startpage.php";
+@
+
+
+1.1.1.1
+log
+@START CVS
+@
+text
+@@

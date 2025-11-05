@@ -1,0 +1,170 @@
+head	1.3;
+access;
+symbols
+	start:1.1.1.1 xocp:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.3
+date	2002.11.21.23.05.02;	author adiet9000;	state dead;
+branches;
+next	1.2;
+
+1.2
+date	2002.11.20.14.39.33;	author adiet9000;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.11.19.19.57.41;	author adiet9000;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.11.19.19.57.41;	author adiet9000;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@--
+@
+text
+@<?php
+//--------------------------------------------------------------------//
+// Filename : modules/login/login_form.php                            //
+// Software : XOCP - X Open Community Portal                          //
+// Version  : 0.1                                                     //
+// Date     : 2002-11-13                                              //
+// Author   : (anybody)                                               //
+// License  : Public Domain                                           //
+//                                                                    //
+// You may use and modify this software as you wish. Share and Enjoy! //
+//--------------------------------------------------------------------//
+
+if ( !defined('LOGIN_FORM_DEFINED') ) {
+   define('LOGIN_FORM_DEFINED', TRUE);
+
+session_register("login_c");
+session_register("login_failed");
+session_register("login_status");
+
+
+class _login_Form extends XocpBlock {
+
+   function main() {
+      global $login_c,$login_failed;
+      global $login,$login_status;
+
+      $this->html->loadScript(XOCP_DOC_ROOT."/modules/login/login.js");
+      $this->html->setBodyOnload(" onload=\"document.login_form.login.focus();\"");
+      
+      switch($this->catch) {
+         default :
+            $login_c = uniqid(rand());
+
+            $loginname = new XocpFormText(_LG_LOGINNAME, "login", 15, 30, "$login");
+            $password = new XocpFormPassword(_LG_PASSWORD, "passwd", 15, 30, "");
+            $hidden = new XocpFormHidden("c", $login_c);
+            $submit_button = new XocpFormButton("", "dologin", _LG_SUBMIT, "submit");
+         
+            $login_form = new XocpThemeForm(_LG_LOGINFORM, "login_form", "index.php","post");
+            $login_form->setExtra("autocomplete=off onsubmit=\"return dosubmit(this,'".XOCP_URL."/login.php')\"");
+         
+            $login_form->addElement($loginname);
+            $login_form->addElement($password);
+            $login_form->addElement($hidden);
+            $login_form->addElement($submit_button);
+            
+            if($login_failed>0) {
+               switch($login_status) {
+                  case XOCP_USERNOEXISTS  : $comment = _LG_USERNOEXISTS;
+                                            break;
+                  case XOCP_WRONGPASSWORD : $comment = _LG_WRONGPASSWORD;
+                                            break;
+                  case XOCP_USERINACTIVE  : $comment = _LG_USERINACTIVE;
+                                            break;
+               }
+               $login_form->setComment(_LG_FAILED . " $login_failed : $comment");
+            }
+         
+            return $login_form->render();
+      }
+   }
+
+}
+
+
+} // LOGIN_FORM_DEFINED
+?>@
+
+
+1.2
+log
+@new message handling method with XocpBlock
+@
+text
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@a19 2
+global $xocpConfig;
+include_once(XOCP_DOC_ROOT."/modules/login/language/".$xocpConfig['language'].".php");
+d21 1
+a21 2
+$this->loadScript(XOCP_DOC_ROOT."/modules/login/login.js");
+$this->setBodyOnload(" onload=\"document.login_form.login.focus();\"");
+d23 37
+a59 26
+function show_login_form() {
+   global $login_c,$login_failed;
+   global $login,$login_status;
+   $login_c = uniqid(rand());
+
+   $loginname = new XocpFormText(_LG_LOGINNAME, "login", 15, 30, "$login");
+   $password = new XocpFormPassword(_LG_PASSWORD, "passwd", 15, 30, "");
+   $hidden = new XocpFormHidden("c", $login_c);
+   $submit_button = new XocpFormButton("", "dologin", _LG_SUBMIT, "submit");
+
+   $login_form = new XocpThemeForm(_LG_LOGINFORM, "login_form", "index.php","post");
+   $login_form->setExtra("autocomplete=off onsubmit=\"return dosubmit(this,'".XOCP_URL."/login.php')\"");
+
+   $login_form->addElement($loginname);
+   $login_form->addElement($password);
+   $login_form->addElement($hidden);
+   $login_form->addElement($submit_button);
+   
+   if($login_failed>0) {
+      switch($login_status) {
+         case XOCP_USERNOEXISTS  : $comment = _LG_USERNOEXISTS;
+                                   break;
+         case XOCP_WRONGPASSWORD : $comment = _LG_WRONGPASSWORD;
+                                   break;
+         case XOCP_USERINACTIVE  : $comment = _LG_USERINACTIVE;
+                                   break;
+a60 1
+      $login_form->setComment(_LG_FAILED . " $login_failed : $comment");
+a62 1
+   return $login_form->render();
+d64 1
+@
+
+
+1.1.1.1
+log
+@START CVS
+@
+text
+@@

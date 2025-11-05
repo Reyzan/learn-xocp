@@ -1,0 +1,181 @@
+head	1.4;
+access;
+symbols
+	start:1.1.1.1 xocp:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.4
+date	2002.11.21.23.13.01;	author adiet9000;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2002.11.21.17.31.34;	author adiet9000;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.11.20.14.39.32;	author adiet9000;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.11.19.19.57.22;	author adiet9000;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.11.19.19.57.22;	author adiet9000;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.4
+log
+@block width now configurable here
+@
+text
+@<?php
+//--------------------------------------------------------------------//
+// Filename : include/common.php                                      //
+// Software : XOCP - X Open Community Portal                          //
+// Version  : 0.1                                                     //
+// Date     : 2002-11-09                                              //
+// Author   : (anybody)                                               //
+// License  : Public Domain                                           //
+//                                                                    //
+// You may use and modify this software as you wish. Share and Enjoy! //
+//--------------------------------------------------------------------//
+
+if (!defined("XOCP_CONFIG_INCLUDED")) {
+   exit();
+} else {
+   
+   // A+B+C+D <= 100
+   define("XOCP_SIDEWIDTH_A",25);
+   define("XOCP_SIDEWIDTH_B",30);
+   define("XOCP_SIDEWIDTH_C",25);
+   define("XOCP_SIDEWIDTH_D",20);
+
+   define("XOCP_SIDEWIDTH_AB",XOCP_SIDEWIDTH_A+XOCP_SIDEWIDTH_B);
+   define("XOCP_SIDEWIDTH_BC",XOCP_SIDEWIDTH_B+XOCP_SIDEWIDTH_C);
+   define("XOCP_SIDEWIDTH_CD",XOCP_SIDEWIDTH_C+XOCP_SIDEWIDTH_D);
+   define("XOCP_SIDEWIDTH_ABC",XOCP_SIDEWIDTH_A+XOCP_SIDEWIDTH_B+XOCP_SIDEWIDTH_C);
+   define("XOCP_SIDEWIDTH_BCD",XOCP_SIDEWIDTH_B+XOCP_SIDEWIDTH_C+XOCP_SIDEWIDTH_D);
+   define("XOCP_SIDEWIDTH_ABCD",XOCP_SIDEWIDTH_A+XOCP_SIDEWIDTH_B+XOCP_SIDEWIDTH_C+XOCP_SIDEWIDTH_D);
+   
+   define("XOCP_SIDE_A","A");
+   define("XOCP_SIDE_B","B");
+   define("XOCP_SIDE_C","C");
+   define("XOCP_SIDE_D","D");
+   define("XOCP_SIDE_AB","AB");
+   define("XOCP_SIDE_BC","BC");
+   define("XOCP_SIDE_CD","CD");
+   define("XOCP_SIDE_ABC","ABC");
+   define("XOCP_SIDE_BCD","BCD");
+   define("XOCP_SIDE_ABCD","ABCD");
+
+   define("XOCP_USERNOTFOUND",0);
+   define("XOCP_WRONGPASSWORD",1);
+   define("XOCP_USEROK",2);
+   define("XOCP_USERINACTIVE",3);
+
+   define("XOCP_BLOCK_INVISIBLE",0);
+   define("XOCP_BLOCK_VISIBLE",1);
+
+   // ############## Include common object class definition file ##############
+   include_once(XOCP_DOC_ROOT."/class/xocpobject.php");
+   include_once(XOCP_DOC_ROOT."/class/xocpuser.php");
+   include_once(XOCP_DOC_ROOT."/class/xocpblock.php");
+
+   // #################### Include site-wide lang file ##################
+   if ( file_exists(XOCP_DOC_ROOT."/language/".$xocpConfig['language'].".php") ) {
+      include_once(XOCP_DOC_ROOT."/language/".$xocpConfig['language'].".php");
+   } else {
+      include_once(XOCP_DOC_ROOT."/language/english.php");
+   }
+
+   // #################### Connect to DB ##################
+   include_once(XOCP_DOC_ROOT."/class/database/".$xocpConfig['database'].".php");
+
+   if ( $xocpConfig['dbhost'] && isset($xocpConfig['dbuname']) && isset($xocpConfig['dbpass']) && $xocpConfig['dbname'] ) {
+      $xocpDB = new Database();
+      if ( $xocpConfig['debug_mode'] ==1 ) {
+         $xocpDB->setDebug(true); 
+      }
+      $xocpDB->setPrefix(XOCP_PREFIX);
+      $xocpDB->connect($xocpConfig['dbhost'], $xocpConfig['dbuname'], $xocpConfig['dbpass'], $xocpConfig['dbname'], $xocpConfig['db_pconnect']);
+   }
+
+   // ############## Include common functions file ##############
+   include_once(XOCP_DOC_ROOT."/include/functions.php");
+   ss_timing_start();
+
+   // ############## Include common functions file ##############
+   include_once(XOCP_DOC_ROOT."/class/textsanitizer.php");
+
+   // ############## Include html class generator file ##############
+   include_once(XOCP_DOC_ROOT."/class/xocphtml.php");
+   include_once(XOCP_DOC_ROOT."/class/form/xocpform.php");
+   include_once(XOCP_DOC_ROOT."/class/xocplist.php");
+
+   // ############## Include theme file ##############
+   $currenttheme = getTheme();
+   include_once(XOCP_DOC_ROOT."/themes/".$currenttheme."/theme.php");
+
+   session_name("XOCPSID");
+   session_start();
+
+
+}
+
+?>@
+
+
+1.3
+log
+@tambah konstanta untuk lebar block
+@
+text
+@a60 3
+   // #################### Include system config files ##################
+   include_once(XOCP_DOC_ROOT."/cache/modules/system/config.php");
+
+@
+
+
+1.2
+log
+@new message handling method with XocpBlock
+@
+text
+@d16 14
+d40 2
+a41 2
+   
+   define("XOCP_USERNOEXISTS",0);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d38 1
+@
+
+
+1.1.1.1
+log
+@START CVS
+@
+text
+@@

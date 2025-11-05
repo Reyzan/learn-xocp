@@ -1,0 +1,172 @@
+head	1.2;
+access;
+symbols
+	start:1.1.1.1 xocp:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2002.11.21.23.20.13;	author adiet9000;	state dead;
+branches;
+next	1.1;
+
+1.1
+date	2002.11.19.19.57.14;	author adiet9000;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.11.19.19.57.14;	author adiet9000;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@--
+@
+text
+@<script type='text/javascript'>
+<!--
+function xoopsGetElementById(id){
+	if (document.getElementById) {
+		return (document.getElementById(id));
+	} else if (document.all) {
+		return (document.all[id]);
+	} else {
+		if ((navigator.appname.indexOf("Netscape") != -1) && parseInt(navigator.appversion == 4)) {
+			return (document.layers[id]);
+		}
+	}
+}
+
+function showImgSelected(imgId, selectId, imgDir) {
+	imgDom = xoopsGetElementById(imgId);
+	selectDom = xoopsGetElementById(selectId);
+	imgDom.src = "<?php echo XOOPS_URL;?>/"+ imgDir + "/" + selectDom.options[selectDom.selectedIndex].value;
+}
+
+function justReturn() {
+	return;
+}
+
+function init() {
+
+}
+
+function openWithSelfMain(url,name,width,height){
+	var options = "width=" + width + ",height=" + height + "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,copyhistory=no";
+	new_window = window.open(url, name, options);
+	window.self.name = "main";
+	new_window.focus();
+}
+
+function setElementColor(id, color){
+	xoopsGetElementById(id).style.color = "#" + color;
+}
+
+function setElementFont(id, font){
+	xoopsGetElementById(id).style.fontFamily = font;
+}
+
+function setElementSize(id, size){
+	xoopsGetElementById(id).style.fontSize = size;
+}
+
+function changeDisplay(id){
+	var elestyle = xoopsGetElementById(id).style;
+	if (elestyle.display == "") {
+		elestyle.display = "none";
+	} else {
+		elestyle.display = "block";
+	}
+}
+
+function setVisible(id){
+	xoopsGetElementById(id).style.visibility = "visible";
+}
+
+function setHidden(id){
+	xoopsGetElementById(id).style.visibility = "hidden";
+}
+
+function makeBold(id){
+	var eleStyle = xoopsGetElementById(id).style;
+	if (eleStyle.fontWeight != "bold") {
+		eleStyle.fontWeight = "bold";
+	} else {
+		eleStyle.fontWeight = "normal";
+	}
+}
+
+function makeItalic(id){
+	var eleStyle = xoopsGetElementById(id).style;
+	if (eleStyle.fontStyle != "italic") {
+		eleStyle.fontStyle = "italic";
+	} else {
+		eleStyle.fontStyle = "normal";
+	}
+}
+
+function makeUnderline(id){
+	var eleStyle = xoopsGetElementById(id).style;
+	if (eleStyle.textDecoration != "underline") {
+		eleStyle.textDecoration = "underline";
+	} else {
+		eleStyle.textDecoration = "none";
+	}
+}
+
+function appendSelectOption(selectMenuId, optionName, optionValue){
+	var selectMenu = xoopsGetElementById(selectMenuId);
+	var newoption = new Option(optionName, optionValue);
+	selectMenu.options[selectMenu.length] = newoption;
+	selectMenu.options[selectMenu.length].selected = true;
+}
+
+function disableElement(target){
+	var targetDom = xoopsGetElementById(target);
+	if (targetDom.disabled != true) {
+		targetDom.disabled = true;
+	} else {
+		targetDom.disabled = false;
+	}
+}
+function xoopsCheckAll(formname, switchid) {
+	var ele = document.forms[formname].elements;
+	var switch_cbox = xoopsGetElementById(switchid);
+	for (var i = 0; i < ele.length; i++) {
+		var e = ele[i];
+		if ( (e.name != switch_cbox.name) && (e.type == 'checkbox') ) {
+			e.checked = switch_cbox.checked;
+		}
+	}
+}
+
+
+window.onload=init;
+//-->
+</script>
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@@
+
+
+1.1.1.1
+log
+@START CVS
+@
+text
+@@
