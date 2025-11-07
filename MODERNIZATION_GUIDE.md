@@ -55,7 +55,7 @@ Your XOCP codebase is a **custom PHP framework from 2002-2003** with a modular a
 - Learning curve
 - Migration complexity
 
-### Path B: Incremental Modernization (2-4 months)
+### Path B: Incremental Modernization (3-4 months)
 **Best for:** Keep existing code working while improving it step-by-step
 
 **Pros:**
@@ -219,7 +219,787 @@ $xocpConfig['dbuname'] = $_ENV['DB_USERNAME'];
 
 ---
 
-## Phase 2: Security Hardening (Week 3)
+## Phase 1.5: PHP 8+ Migration (Week 2-3)
+
+### Goal: Leverage PHP 8.0+ features for better performance, type safety, and developer experience
+
+PHP 8+ introduced revolutionary features that make code cleaner, faster, and safer. This phase shows you how to migrate from PHP 7.4 to PHP 8+ and leverage new features.
+
+### Why Upgrade to PHP 8+?
+
+**Performance:**
+- **2-3x faster** than PHP 7.4 (JIT compiler)
+- 10-30% less memory usage
+- Better opcache optimization
+
+**Developer Experience:**
+- Named arguments
+- Constructor property promotion
+- Match expressions
+- Union types & nullsafe operator
+- Attributes (annotations)
+- Enums (PHP 8.1)
+- Readonly properties
+
+**Security:**
+- Stricter type system
+- Better error handling
+- Fewer silent failures
+
+### Step 1.5.1: Update PHP Version Requirement
+
+Update `composer.json`:
+```json
+{
+    "require": {
+        "php": ">=8.1",
+        "vlucas/phpdotenv": "^5.5",
+        "monolog/monolog": "^3.0"
+    }
+}
+```
+
+### Step 1.5.2: Breaking Changes & Fixes
+
+#### 🔴 Critical Breaking Changes
+
+**1. Null to Non-Nullable Type Deprecation**
+
+**Before (PHP 7.4 - works, PHP 8+ - error):**
+```php
+function setName(string $name) {
+    $this->name = $name;
+}
+
+setName(null); // Fatal error in PHP 8+
+```
+
+**After:**
+```php
+function setName(?string $name) { // Nullable type
+    $this->name = $name;
+}
+
+setName(null); // Now works
+```
+
+**2. String to Number Comparisons**
+
+**Before (PHP 7.4 - loose comparison):**
+```php
+0 == "hello"; // true in PHP 7.4 (!!!)
+```
+
+**After (PHP 8+ - strict comparison):**
+```php
+0 == "hello"; // false in PHP 8+
+// Use strict comparison always
+0 === "hello"; // false
+```
+
+**3. Array Key Auto-increment**
+
+**Before:**
+```php
+$array = [];
+$array[] = "a";
+$array["1"] = "b"; // String key
+$array[] = "c";    // Gets index 1 in PHP 7.4 (overwrites!)
+```
+
+**After (PHP 8+):**
+```php
+// Gets index 2 in PHP 8+ (safer)
+```
+
+**Fix for XOCP:** Audit all dynamic array operations.
+
+**4. `@` Error Suppression Operator**
+
+PHP 8+ makes `@` less effective. **Replace in your codebase:**
+
+**Before:**
+```php
+@mysql_connect($host, $user, $pass); // Bad practice
+```
+
+**After:**
+```php
+try {
+    $pdo = new PDO($dsn, $user, $pass);
+} catch (PDOException $e) {
+    error_log("Database connection failed: " . $e->getMessage());
+    throw $e;
+}
+```
+
+### Step 1.5.3: PHP 8.0 Features to Use
+
+#### 1. **Named Arguments** (Game Changer for XOCP Forms)
+
+**Before:**
+```php
+// class/form/xocpform.php
+$form->addElement(new XocpFormText('uname', 'Username', 50, 255, ''));
+// What's 50? What's 255? Hard to remember!
+```
+
+**After:**
+```php
+$form->addElement(new XocpFormText(
+    name: 'uname',
+    caption: 'Username',
+    size: 50,
+    maxlength: 255,
+    value: ''
+));
+// Much clearer!
+```
+
+**Update form classes:**
+```php
+// class/form/xocpformtext.php
+class XocpFormText extends XocpFormElement {
+    public function __construct(
+        string $name,
+        string $caption = '',
+        int $size = 50,
+        int $maxlength = 255,
+        string $value = ''
+    ) {
+        $this->name = $name;
+        $this->caption = $caption;
+        $this->size = $size;
+        $this->maxlength = $maxlength;
+        $this->value = $value;
+    }
+}
+```
+
+#### 2. **Constructor Property Promotion** (Less Boilerplate)
+
+**Before:**
+```php
+// class/xocpobject.php
+class XocpObject {
+    private $vars = [];
+    private $db;
+    private $table;
+
+    public function __construct($table, $db) {
+        $this->table = $table;
+        $this->db = $db;
+        $this->vars = [];
+    }
+}
+```
+
+**After (PHP 8+):**
+```php
+class XocpObject {
+    public function __construct(
+        private string $table,
+        private DBConnection $db,
+        private array $vars = []
+    ) {
+        // Properties automatically assigned!
+    }
+}
+```
+
+**Savings:** 50% less boilerplate code across all classes!
+
+#### 3. **Nullsafe Operator** (Stop Null Checking Hell)
+
+**Before:**
+```php
+// modules/project/project.php
+$project = getProject($id);
+if ($project !== null) {
+    $owner = $project->getOwner();
+    if ($owner !== null) {
+        $email = $owner->getEmail();
+        if ($email !== null) {
+            echo $email;
+        }
+    }
+}
+```
+
+**After (PHP 8+):**
+```php
+echo $project?->getOwner()?->getEmail() ?? 'No email';
+// One line, safe, clean!
+```
+
+#### 4. **Match Expression** (Better than Switch)
+
+**Before:**
+```php
+// include/functions.php
+function getUserRoleLabel($role) {
+    switch ($role) {
+        case 1:
+            return 'Admin';
+        case 2:
+            return 'Moderator';
+        case 3:
+            return 'User';
+        default:
+            return 'Guest';
+    }
+}
+```
+
+**After (PHP 8+):**
+```php
+function getUserRoleLabel($role) {
+    return match($role) {
+        1 => 'Admin',
+        2 => 'Moderator',
+        3 => 'User',
+        default => 'Guest',
+    }; // Auto-return, strict comparison, no fall-through
+}
+```
+
+#### 5. **Union Types** (More Precise Type Hints)
+
+**Before:**
+```php
+// class/database/database.php
+function query($sql) { // What does this return?
+    // Could be result object, false, or array
+}
+```
+
+**After (PHP 8+):**
+```php
+function query(string $sql): PDOStatement|false {
+    // Clear return type
+}
+
+function getUser(int|string $identifier): ?User {
+    // Accepts int ID or string username
+}
+```
+
+#### 6. **Mixed Type** (Better than No Type)
+
+**Before:**
+```php
+function getVar($key) { // No type hints
+    return $this->vars[$key] ?? null;
+}
+```
+
+**After:**
+```php
+function getVar(string $key): mixed { // Explicitly mixed
+    return $this->vars[$key] ?? null;
+}
+```
+
+#### 7. **Attributes** (Metadata for Classes)
+
+Use attributes instead of docblock comments:
+
+**Before:**
+```php
+/**
+ * @table users
+ * @primary_key uid
+ */
+class User extends XocpObject {
+}
+```
+
+**After (PHP 8+):**
+```php
+#[Table('users')]
+#[PrimaryKey('uid')]
+class User extends XocpObject {
+}
+
+// Can be read programmatically!
+$reflection = new ReflectionClass(User::class);
+$table = $reflection->getAttributes(Table::class)[0]->newInstance();
+echo $table->name; // 'users'
+```
+
+### Step 1.5.4: PHP 8.1 Features
+
+#### 1. **Enums** (Type-Safe Constants)
+
+**Before:**
+```php
+// config.php or constants
+define('USER_ROLE_ADMIN', 1);
+define('USER_ROLE_MODERATOR', 2);
+define('USER_ROLE_USER', 3);
+
+function checkRole($role) {
+    if ($role === USER_ROLE_ADMIN) { // Typo-prone
+        // ...
+    }
+}
+```
+
+**After (PHP 8.1+):**
+```php
+// src/Enums/UserRole.php
+enum UserRole: int {
+    case Admin = 1;
+    case Moderator = 2;
+    case User = 3;
+    case Guest = 4;
+
+    public function label(): string {
+        return match($this) {
+            self::Admin => 'Administrator',
+            self::Moderator => 'Moderator',
+            self::User => 'Registered User',
+            self::Guest => 'Guest',
+        };
+    }
+
+    public function canModerate(): bool {
+        return match($this) {
+            self::Admin, self::Moderator => true,
+            default => false,
+        };
+    }
+}
+
+// Usage
+function checkRole(UserRole $role) { // Type-safe!
+    if ($role === UserRole::Admin) {
+        // IDE autocomplete, no typos possible
+    }
+}
+
+$role = UserRole::from($_SESSION['role_id']); // Safe conversion
+echo $role->label(); // "Administrator"
+```
+
+**Apply to XOCP:**
+```php
+enum ModulePermission: string {
+    case Read = 'read';
+    case Write = 'write';
+    case Admin = 'admin';
+}
+
+enum DatabaseDriver: string {
+    case MySQL = 'mysql';
+    case PostgreSQL = 'postgresql';
+}
+```
+
+#### 2. **Readonly Properties** (Immutable Objects)
+
+**Before:**
+```php
+class Config {
+    public $dbHost;
+
+    public function __construct($dbHost) {
+        $this->dbHost = $dbHost;
+    }
+}
+
+$config = new Config('localhost');
+$config->dbHost = 'hacked.com'; // Oops! Mutable
+```
+
+**After (PHP 8.1+):**
+```php
+class Config {
+    public function __construct(
+        public readonly string $dbHost,
+        public readonly string $dbName,
+        public readonly string $dbUser,
+    ) {}
+}
+
+$config = new Config('localhost', 'xocp', 'root');
+$config->dbHost = 'hacked.com'; // Fatal error! Immutable
+```
+
+#### 3. **First-Class Callable Syntax**
+
+**Before:**
+```php
+array_map(function($user) {
+    return $user->getName();
+}, $users);
+```
+
+**After (PHP 8.1+):**
+```php
+array_map($user->getName(...), $users);
+```
+
+#### 4. **Array Unpacking with String Keys**
+
+**Before:**
+```php
+$defaults = ['theme' => 'plain', 'lang' => 'english'];
+$custom = ['theme' => 'dark'];
+$config = array_merge($defaults, $custom);
+```
+
+**After (PHP 8.1+):**
+```php
+$config = [...$defaults, ...$custom]; // Cleaner
+```
+
+### Step 1.5.5: PHP 8.2 Features
+
+#### 1. **Readonly Classes** (All Properties Readonly)
+
+**Before:**
+```php
+class UserDTO {
+    public function __construct(
+        public readonly int $id,
+        public readonly string $name,
+        public readonly string $email,
+        public readonly string $role
+    ) {}
+}
+```
+
+**After (PHP 8.2+):**
+```php
+readonly class UserDTO {
+    public function __construct(
+        public int $id,
+        public string $name,
+        public string $email,
+        public string $role
+    ) {}
+    // All properties automatically readonly!
+}
+```
+
+#### 2. **Disjunctive Normal Form (DNF) Types**
+
+```php
+function process((User&Admin)|(Guest&Verified) $user) {
+    // Complex type combinations
+}
+```
+
+#### 3. **True Type** (More Specific)
+
+```php
+function isValid(): true { // Only returns true, never false
+    return true;
+}
+```
+
+### Step 1.5.6: PHP 8.3 Features
+
+#### 1. **Typed Class Constants**
+
+**Before:**
+```php
+class Database {
+    const DRIVER = 'mysql'; // No type
+}
+```
+
+**After (PHP 8.3+):**
+```php
+class Database {
+    const string DRIVER = 'mysql';
+    const int MAX_CONNECTIONS = 100;
+}
+```
+
+#### 2. **Override Attribute** (Safety for Inheritance)
+
+```php
+class XocpUser extends XocpObject {
+    #[Override]
+    public function load(int $id): bool {
+        // Compiler ensures parent has this method
+    }
+}
+```
+
+### Step 1.5.7: Modernize XOCP Classes with PHP 8+
+
+#### XocpObject with PHP 8+ Features
+
+**Before (PHP 7.4):**
+```php
+// class/xocpobject.php
+class XocpObject {
+    var $vars = [];
+    var $db;
+    var $table;
+
+    function __construct() {
+        $this->vars = [];
+    }
+
+    function initVar($key, $data_type, $value = null) {
+        $this->vars[$key] = [
+            'type' => $data_type,
+            'value' => $value
+        ];
+    }
+
+    function getVar($key) {
+        return isset($this->vars[$key]['value'])
+            ? $this->vars[$key]['value']
+            : null;
+    }
+}
+```
+
+**After (PHP 8.1+):**
+```php
+// src/Database/Model.php
+abstract readonly class Model {
+    public function __construct(
+        protected PDO $db,
+        protected string $table,
+        protected string $primaryKey = 'id'
+    ) {}
+
+    public function find(int|string $id): ?static {
+        $stmt = $this->db->prepare(
+            "SELECT * FROM {$this->table} WHERE {$this->primaryKey} = ?"
+        );
+        $stmt->execute([$id]);
+
+        $data = $stmt->fetch();
+        return $data ? static::fromArray($data) : null;
+    }
+
+    abstract public static function fromArray(array $data): static;
+}
+
+// src/Models/User.php
+readonly class User extends Model {
+    public function __construct(
+        PDO $db,
+        public int $uid,
+        public string $uname,
+        public string $email,
+        public UserRole $role,
+        public ?string $name = null,
+    ) {
+        parent::__construct($db, 'users', 'uid');
+    }
+
+    public static function fromArray(array $data): static {
+        return new self(
+            db: app('db'),
+            uid: (int)$data['uid'],
+            uname: $data['uname'],
+            email: $data['email'],
+            role: UserRole::from($data['role']),
+            name: $data['name'] ?? null,
+        );
+    }
+
+    public function can(ModulePermission $permission, string $module): bool {
+        return match($this->role) {
+            UserRole::Admin => true,
+            UserRole::Moderator => $permission !== ModulePermission::Admin,
+            default => $permission === ModulePermission::Read,
+        };
+    }
+}
+
+// Usage - so much cleaner!
+$user = User::find(123);
+echo $user?->name ?? 'Anonymous'; // Nullsafe
+if ($user?->can(ModulePermission::Write, 'project')) {
+    // ...
+}
+```
+
+### Step 1.5.8: Migration Checklist
+
+**Week 2: Preparation**
+- [ ] Upgrade local environment to PHP 8.1+
+- [ ] Run `composer update` with PHP 8.1 requirements
+- [ ] Enable all error reporting
+- [ ] Create test suite (if not done in Phase 5)
+
+**Week 3: Code Updates**
+- [ ] Replace `var` with `public/private/protected`
+- [ ] Add type hints to all function parameters
+- [ ] Add return type declarations
+- [ ] Replace switch with match where applicable
+- [ ] Create enums for constants
+- [ ] Use constructor property promotion
+- [ ] Add readonly where applicable
+- [ ] Use nullsafe operator for nested calls
+- [ ] Replace `strpos() === false` with `str_contains()`
+- [ ] Replace `strlen()` checks with `empty()`
+
+**Week 4: Testing & Optimization**
+- [ ] Run full test suite
+- [ ] Enable opcache with JIT
+- [ ] Benchmark performance (should be 2-3x faster)
+- [ ] Fix any remaining warnings
+
+### Step 1.5.9: PHP 8+ String Functions (Bonus)
+
+PHP 8+ added convenient string functions:
+
+**Before (PHP 7.4):**
+```php
+if (strpos($email, '@') !== false) {
+    // Contains @
+}
+
+if (strpos($url, 'https://') === 0) {
+    // Starts with https
+}
+
+if (substr($filename, -4) === '.php') {
+    // Ends with .php
+}
+```
+
+**After (PHP 8+):**
+```php
+if (str_contains($email, '@')) {
+    // Much cleaner!
+}
+
+if (str_starts_with($url, 'https://')) {
+    // Clear intent
+}
+
+if (str_ends_with($filename, '.php')) {
+    // Readable
+}
+```
+
+### Step 1.5.10: Performance: Enable JIT Compiler
+
+Add to `php.ini` or `.htaccess`:
+```ini
+opcache.enable=1
+opcache.jit_buffer_size=100M
+opcache.jit=1255
+```
+
+**Benchmark results you can expect:**
+- Complex calculations: 2-3x faster
+- String operations: 20-30% faster
+- Array operations: 10-20% faster
+- Database-heavy apps: 10-15% faster overall
+
+### Step 1.5.11: PHP 8+ Migration Example
+
+**Complete module migration example:**
+
+**Before (modules/calendar/calendar.php - PHP 7.4):**
+```php
+<?php
+require_once "../../config.php";
+require_once XOCP_DOC_ROOT . "/include/common.php";
+
+global $xocpDB, $xocp_user;
+
+$month = isset($HTTP_GET_VARS['month']) ? intval($HTTP_GET_VARS['month']) : date('m');
+$year = isset($HTTP_GET_VARS['year']) ? intval($HTTP_GET_VARS['year']) : date('Y');
+
+if ($month < 1 || $month > 12) {
+    $month = date('m');
+}
+
+$sql = "SELECT * FROM " . XOCP_PREFIX . "calendar_events
+        WHERE MONTH(event_date) = " . $month . "
+        AND YEAR(event_date) = " . $year;
+$result = $xocpDB->query($sql);
+
+$events = [];
+while ($row = $xocpDB->fetchArray($result)) {
+    $events[] = $row;
+}
+
+echo "<h1>Calendar - " . date('F Y', mktime(0,0,0,$month,1,$year)) . "</h1>";
+foreach ($events as $event) {
+    echo "<div>" . $event['title'] . " - " . $event['event_date'] . "</div>";
+}
+?>
+```
+
+**After (src/Controllers/CalendarController.php - PHP 8.1+):**
+```php
+<?php
+namespace Xocp\Controllers;
+
+use Xocp\Models\CalendarEvent;
+use DateTimeImmutable;
+
+readonly class CalendarController extends BaseController {
+    public function __construct(
+        private CalendarEvent $eventModel
+    ) {}
+
+    public function index(int $month = null, int $year = null): void {
+        $now = new DateTimeImmutable();
+        $month ??= (int)$now->format('m');
+        $year ??= (int)$now->format('Y');
+
+        $month = match(true) {
+            $month < 1 => 1,
+            $month > 12 => 12,
+            default => $month,
+        };
+
+        $events = $this->eventModel->getByMonth(
+            month: $month,
+            year: $year
+        );
+
+        $this->render('calendar/index', [
+            'month' => $month,
+            'year' => $year,
+            'monthName' => $now->setDate($year, $month, 1)->format('F Y'),
+            'events' => $events,
+        ]);
+    }
+}
+```
+
+**Benefits of PHP 8+ version:**
+- ✅ No globals
+- ✅ Type-safe parameters
+- ✅ Null coalescing assignment (`??=`)
+- ✅ Match expression for validation
+- ✅ Named arguments
+- ✅ Constructor property promotion
+- ✅ Readonly class (immutable)
+- ✅ No SQL injection (model handles queries)
+- ✅ Separation of concerns
+- ✅ Testable
+
+### Step 1.5.12: IDE Configuration for PHP 8+
+
+Update `.vscode/settings.json` or PHPStorm settings:
+```json
+{
+    "php.version": "8.1",
+    "php.suggest.basic": true,
+    "intelephense.environment.phpVersion": "8.1.0"
+}
+```
+
+---
+
+## Phase 2: Security Hardening (Week 4)
 
 ### Step 2.1: Implement Prepared Statements
 
@@ -321,7 +1101,7 @@ $form->addElement(new XocpFormHidden('csrf_token', generateCsrfToken()));
 
 ---
 
-## Phase 3: Modern Architecture (Week 4-6)
+## Phase 3: Modern Architecture (Week 5-7)
 
 ### Step 3.1: Introduce PSR-4 Autoloading
 
@@ -503,7 +1283,7 @@ $container->bind(\Xocp\Services\AuthService::class, function($c) {
 
 ---
 
-## Phase 4: Modern ORM/Query Builder (Week 7-8)
+## Phase 4: Modern ORM/Query Builder (Week 8-9)
 
 Instead of raw SQL everywhere, introduce a query builder:
 
@@ -623,7 +1403,7 @@ class QueryBuilder {
 
 ---
 
-## Phase 5: Testing & CI/CD (Week 9-10)
+## Phase 5: Testing & CI/CD (Week 10-12)
 
 ### Step 5.1: Add PHPUnit
 ```bash
@@ -900,10 +1680,11 @@ return [
 | Scenario | Recommendation |
 |----------|----------------|
 | **Need to add features ASAP** | Phase 1-2 (Foundation + Security) |
-| **Have 2-3 months** | Incremental modernization (All 5 phases) |
+| **Have 3-4 months** | Incremental modernization (All phases inc. PHP 8+) |
 | **Have 6+ months & budget** | Rewrite in Laravel |
 | **Small team, limited PHP knowledge** | CodeIgniter 4 |
-| **Want to learn modern PHP** | Incremental + Eloquent ORM |
+| **Want to learn modern PHP** | Incremental + PHP 8.1+ + Eloquent ORM |
+| **Already on PHP 8+** | Skip to Phase 2, focus on security first |
 
 ---
 
