@@ -1,0 +1,129 @@
+name: 🐛 Bug Report
+description: Report a bug or unexpected behavior in XOCP
+title: "[Bug]: "
+labels: ["bug", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the form below to help us investigate.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: I expected...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: Instead, I saw...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: php-version
+    attributes:
+      label: PHP Version
+      description: What version of PHP are you running?
+      options:
+        - PHP 8.3
+        - PHP 8.2
+        - PHP 8.1
+        - PHP 8.0
+        - PHP 7.4 (legacy)
+        - PHP 7.3 or older (not supported)
+        - Unknown
+    validations:
+      required: true
+
+  - type: dropdown
+    id: database
+    attributes:
+      label: Database
+      description: What database are you using?
+      options:
+        - MySQL 8.0+
+        - MySQL 5.7
+        - PostgreSQL
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: modernization-phase
+    attributes:
+      label: Modernization Status
+      description: Have you completed any modernization phases?
+      options:
+        - Legacy codebase (no modernization)
+        - Phase 1 completed (Foundation)
+        - Phase 1.5 completed (PHP 8+)
+        - Phase 2 completed (Security)
+        - Phase 3 completed (Architecture)
+        - Phase 4 completed (ORM)
+        - Phase 5 completed (Testing)
+        - Full rewrite (Laravel/CI)
+    validations:
+      required: false
+
+  - type: textarea
+    id: error-log
+    attributes:
+      label: Error Messages
+      description: Please copy and paste any relevant error messages or logs
+      render: shell
+      placeholder: |
+        PHP Fatal error: ...
+        MySQL Error: ...
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here
+      placeholder: |
+        - Browser: Chrome 120
+        - OS: Ubuntu 22.04
+        - Web server: Apache 2.4
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have searched existing issues to avoid duplicates
+          required: true
+        - label: I have checked the MODERNIZATION_GUIDE.md for related information
+          required: false
+        - label: I can provide a minimal reproduction case
+          required: false

@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 Modernization Guide
+    url: https://github.com/Reyzan/learn-xocp/blob/main/MODERNIZATION_GUIDE.md
+    about: Complete guide for modernizing your XOCP codebase to PHP 8+
+  - name: 💬 Discussions
+    url: https://github.com/Reyzan/learn-xocp/discussions
+    about: Ask questions and discuss modernization strategies with the community
+  - name: 🐛 Security Issues
+    url: https://github.com/Reyzan/learn-xocp/security/advisories/new
+    about: Report security vulnerabilities privately

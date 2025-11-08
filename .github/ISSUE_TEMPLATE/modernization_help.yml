@@ -1,0 +1,162 @@
+name: 🔧 Modernization Help
+description: Get help with modernizing your XOCP codebase
+title: "[Modernization]: "
+labels: ["modernization", "help wanted"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Need help modernizing your XOCP codebase? We're here to help!
+
+        📖 First, check the [MODERNIZATION_GUIDE.md](../MODERNIZATION_GUIDE.md) for detailed instructions.
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Which Phase Do You Need Help With?
+      description: Select the modernization phase you're working on
+      options:
+        - Phase 1 - Foundation (PHP 7.4+, PDO, Sessions)
+        - Phase 1.5 - PHP 8+ Migration
+        - Phase 2 - Security Hardening
+        - Phase 3 - Modern Architecture (PSR-4, DI, Routing)
+        - Phase 4 - ORM/Query Builder
+        - Phase 5 - Testing & CI/CD
+        - General Strategy / Choosing a Path
+        - Laravel/CI Migration
+    validations:
+      required: true
+
+  - type: dropdown
+    id: current-php
+    attributes:
+      label: Current PHP Version
+      description: What PHP version are you currently using?
+      options:
+        - PHP 5.x or older
+        - PHP 7.0-7.3
+        - PHP 7.4
+        - PHP 8.0
+        - PHP 8.1
+        - PHP 8.2
+        - PHP 8.3
+    validations:
+      required: true
+
+  - type: dropdown
+    id: target-php
+    attributes:
+      label: Target PHP Version
+      description: What PHP version do you want to upgrade to?
+      options:
+        - PHP 7.4
+        - PHP 8.0
+        - PHP 8.1
+        - PHP 8.2
+        - PHP 8.3
+        - Latest stable
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue
+    attributes:
+      label: What Issue Are You Facing?
+      description: Describe the specific problem or error you're encountering
+      placeholder: |
+        When I try to... I get the following error:
+
+        ```
+        Fatal error: ...
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: attempted
+    attributes:
+      label: What Have You Tried?
+      description: What steps have you already taken?
+      placeholder: |
+        - I tried updating composer.json
+        - I replaced mysql_* with mysqli
+        - I read the guide section on...
+    validations:
+      required: true
+
+  - type: textarea
+    id: code-sample
+    attributes:
+      label: Relevant Code Sample
+      description: Share the code that needs modernization (if applicable)
+      render: php
+      placeholder: |
+        // Old code
+        $result = mysql_query("SELECT * FROM users WHERE uid = " . $uid);
+
+        // I want to modernize this to PDO with prepared statements
+
+  - type: dropdown
+    id: timeline
+    attributes:
+      label: Timeline
+      description: How urgent is this modernization?
+      options:
+        - Critical - Production down
+        - High - Blocking deployment
+        - Medium - Planning migration
+        - Low - Learning/exploring
+    validations:
+      required: true
+
+  - type: dropdown
+    id: expertise
+    attributes:
+      label: PHP Experience Level
+      description: How would you rate your PHP experience?
+      options:
+        - Beginner (< 1 year)
+        - Intermediate (1-3 years)
+        - Advanced (3+ years)
+        - Expert (5+ years)
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Details
+      description: Provide information about your environment
+      placeholder: |
+        - OS: Ubuntu 22.04
+        - Web Server: Apache 2.4
+        - Database: MySQL 8.0
+        - Composer Version: 2.6
+        - Development/Production: Development
+
+  - type: checkboxes
+    id: migration-path
+    attributes:
+      label: Modernization Path
+      description: Which path are you considering?
+      options:
+        - label: Incremental modernization (keep existing code)
+        - label: Full rewrite with Laravel
+        - label: Full rewrite with CodeIgniter
+        - label: Not sure yet (need guidance)
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have read the MODERNIZATION_GUIDE.md
+          required: true
+        - label: I have searched existing issues for similar problems
+          required: true
+        - label: I have backed up my database and code
+          required: false
+        - label: I have a test environment to work in
+          required: false
